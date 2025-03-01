@@ -1,10 +1,11 @@
 package com.example.personalhealthassistantapp
 
+import android.os.Build
 import android.util.Log
+import androidx.annotation.RequiresApi
 import androidx.compose.runtime.mutableStateListOf
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
-import com.example.personalhealthassistantapp.Utils.GEMINI_KEY
 import com.google.ai.client.generativeai.GenerativeModel
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.launch
@@ -18,8 +19,8 @@ class ChatViewModel @Inject constructor() : ViewModel() {
     }
 
     private val generativeModel: GenerativeModel = GenerativeModel(
-        modelName = "gemini-pro", // Change to a supported model
-        apiKey = GEMINI_KEY
+        modelName = "gemini-1.5-pro", // Change to a supported model
+        apiKey = Utils.GEMINI_KEY
     )
 
 
@@ -28,9 +29,15 @@ class ChatViewModel @Inject constructor() : ViewModel() {
             try {
                 val chat = generativeModel.startChat()
                 messageList.add(MessageModel(question, true))
+                messageList.add(MessageModel("Typing...", false))
 
                 val response = chat.sendMessage(question)
                 Log.d("ChatViewModel", response.text.toString())
+                if (Build.VERSION.SDK_INT >= 35) {
+                    messageList.removeLast()
+                }else{
+                    messageList.removeAt(messageList.size - 1)
+                }
                 messageList.add(MessageModel(response.text.toString(), false))
             } catch (e: Exception) {
                 Log.e("ChatViewModel", "Error sending message: ${e.message}")

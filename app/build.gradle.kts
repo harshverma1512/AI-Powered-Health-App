@@ -83,6 +83,8 @@ dependencies {
     //koin
     implementation(libs.koin.android)
 
+    //ktor
+
 
     //Hilt
     implementation(libs.hilt.android)

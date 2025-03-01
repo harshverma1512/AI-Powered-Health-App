@@ -1,11 +1,9 @@
 package com.example.personalhealthassistantapp
 
 import android.os.Bundle
-import android.widget.EditText
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
 import androidx.activity.enableEdgeToEdge
-import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
@@ -14,8 +12,10 @@ import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.wrapContentHeight
+import androidx.compose.foundation.layout.wrapContentWidth
 import androidx.compose.foundation.lazy.LazyColumn
-import androidx.compose.foundation.rememberScrollState
+import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Send
 import androidx.compose.material3.Icon
@@ -32,12 +32,16 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.platform.LocalSoftwareKeyboardController
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.hilt.navigation.compose.hiltViewModel
 import com.example.personalhealthassistantapp.ui.theme.PersonalHealthAssistantAppTheme
+import com.example.personalhealthassistantapp.ui.theme.bot
+import com.example.personalhealthassistantapp.ui.theme.user
 import dagger.hilt.android.AndroidEntryPoint
 
 @AndroidEntryPoint
@@ -69,45 +73,75 @@ class MainActivity : ComponentActivity() {
 
 @Composable
 fun ChatBox(modifier: Modifier = Modifier, messageList: List<MessageModel>) {
-    LazyColumn(modifier = modifier.padding(20.dp), verticalArrangement = Arrangement.spacedBy(10.dp)) {
+    LazyColumn(modifier = modifier) {
         items(messageList.reversed().size) {
-            Text(text = messageList[it].message, modifier = Modifier.padding(10.dp), color = Color.Black, fontSize = 14.sp)
+            MessageDesign(messageList[it])
         }
     }
 }
 
 @Composable
-fun MessageInput(sendMessage : (String) -> Unit) {
-    var message by remember {
-        mutableStateOf("")
+fun MessageDesign(message: MessageModel) {
+    Row(
+        modifier = Modifier.fillMaxWidth(),
+        horizontalArrangement = if (message.isUser) Arrangement.End else Arrangement.Start
+    ) {
+        Box(
+            modifier = Modifier
+                .padding(horizontal = 8.dp, vertical = 4.dp)
+                .background(
+                    color = if (message.isUser) user else bot,
+                    shape = RoundedCornerShape(12.dp)
+                )
+                .wrapContentWidth() // Prevents bubble from stretching too much
+                .padding(horizontal = 12.dp, vertical = 8.dp) // Adds space inside the bubble
+        ) {
+            Text(
+                text = message.message,
+                color = Color.White,
+                fontSize = 14.sp,
+                modifier = Modifier.padding(4.dp) // Ensures text doesn't touch edges
+            )
+        }
     }
+}
+
+
+@Composable
+fun MessageInput(sendMessage: (String) -> Unit) {
+    var message by remember { mutableStateOf("") }
+    val keyboardController = LocalSoftwareKeyboardController.current
 
     Row(
         modifier = Modifier
-            .fillMaxWidth(),
+            .fillMaxWidth()
+            .padding(10.dp), // Adds padding around the input field
         verticalAlignment = Alignment.CenterVertically
     ) {
         OutlinedTextField(
             value = message,
             onValueChange = { message = it },
             modifier = Modifier
-                .weight(1f) // This makes it take all available space
-                .padding(top = 10.dp, bottom = 10.dp, start = 10.dp, end = 5.dp),
+                .weight(1f)
+                .padding(end = 8.dp), // Ensures spacing between text field and button
             label = { Text("Enter message") }
         )
 
-        IconButton(
-            onClick = {
-                sendMessage(message)
+        IconButton(onClick = {
+            if (message.isNotBlank()) {
+                sendMessage(message.trim())
                 message = ""
-            },
-            modifier = Modifier.padding(end = 10.dp) // Optional padding for better spacing
-        ) {
+                keyboardController?.hide()
+            }
+        }) {
             Icon(imageVector = Icons.Default.Send, contentDescription = "Send")
+            //hide soft keyboard
+
+
         }
     }
-
 }
+
 
 @Composable
 fun ChatBoxHeader(modifier: Modifier = Modifier) {
