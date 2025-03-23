@@ -1,5 +1,6 @@
-package com.example.personalhealthassistantapp.ui.theme
+package com.example.personalhealthassistantapp.presentation.ui
 
+import android.annotation.SuppressLint
 import androidx.compose.ui.graphics.Color
 
 val Purple80 = Color(0xFFD0BCFF)
@@ -11,3 +12,4 @@ val PurpleGrey40 = Color(0xFF625b71)
 val Pink40 = Color(0xFF7D5260)
 val user = Color(0xFF00BCD4)
 val bot = Color(0xFF4CAF50)
+val progressColor = Color(0xFF090E1D)

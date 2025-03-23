@@ -1,4 +1,4 @@
-package com.example.personalhealthassistantapp.ui.theme
+package com.example.personalhealthassistantapp.presentation.ui
 
 import androidx.compose.material3.Typography
 import androidx.compose.ui.text.TextStyle
