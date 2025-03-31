@@ -1,11 +1,14 @@
 package com.example.personalhealthassistantapp.presentation.welcomScreen
 
 import androidx.compose.foundation.Image
-import androidx.compose.foundation.gestures.scrollable
 import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
+import androidx.compose.foundation.layout.fillMaxHeight
+import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.width
@@ -30,17 +33,18 @@ import androidx.compose.ui.text.withStyle
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import androidx.navigation.NavController
 import com.example.personalhealthassistantapp.R
+import com.example.personalhealthassistantapp.presentation.ScreensName
 
 @Composable
-@Preview(showBackground = true)
-private fun WelcomeScreenFirst() {
+fun WelcomeScreenFirst(navController: NavController) {
     Column(
-        verticalArrangement = Arrangement.Center,
         horizontalAlignment = Alignment.CenterHorizontally,
+        verticalArrangement = Arrangement.Center,
         modifier = Modifier
-            .verticalScroll(rememberScrollState())
-            .padding(vertical = 30.dp)
+            .fillMaxHeight()
+            .fillMaxWidth()
     ) {
         Image(painter = painterResource(id = R.drawable.health_plus), contentDescription = "")
         Text(
@@ -56,33 +60,37 @@ private fun WelcomeScreenFirst() {
             textAlign = TextAlign.Center,
             modifier = Modifier
                 .padding(top = 15.dp)
-                .align(Alignment.CenterHorizontally)
         )
         Image(
-            painter = painterResource(id = R.drawable.welcome_frame1),
+            painter = painterResource(id = R.drawable.welcome_frame),
             contentDescription = "",
             modifier = Modifier.padding(top = 20.dp)
         )
+        Spacer(modifier = Modifier.height(18.dp))
         Button(
-            onClick = {},
+            onClick = {navController.navigate(ScreensName.WelcomeScreenSecond.name)},
             colors = ButtonDefaults.buttonColors()
                 .copy(containerColor = colorResource(id = R.color.app_bar_color)),
             modifier = Modifier
                 .width(200.dp)
                 .height(60.dp)
         ) {
-            Text(text = "Get Started ")
+            Text(text = "Get Started", color = colorResource(id = R.color.white))
             Spacer(modifier = Modifier.width(15.dp))
             Image(
                 painter = painterResource(id = R.drawable.monotone_arrow_right_md),
                 contentDescription = ""
             )
         }
-
-        Row(modifier = Modifier.padding(top = 10.dp)) {
+        Row(
+            modifier = Modifier
+                .padding(top = 20.dp)
+                .align(Alignment.CenterHorizontally), verticalAlignment = Alignment.CenterVertically
+        ) {
             Text(text = "Already have an account?")
             Spacer(modifier = Modifier.width(5.dp))
-            Text(text = "Sign in",
+            Text(
+                text = "Sign in",
                 style = TextStyle(textDecoration = TextDecoration.Underline),
                 color = Color.Red
             )

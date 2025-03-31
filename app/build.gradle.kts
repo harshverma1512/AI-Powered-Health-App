@@ -80,11 +80,7 @@ dependencies {
     implementation(libs.ktor.client.serialization.jvm)
     implementation(libs.ktor.client.logging)
 
-    //koin
-    implementation(libs.koin.android)
-
-    //ktor
-
+    //Navigation
 
     //Hilt
     implementation(libs.hilt.android)

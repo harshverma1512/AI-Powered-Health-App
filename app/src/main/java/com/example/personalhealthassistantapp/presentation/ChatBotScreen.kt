@@ -1,13 +1,10 @@
-package com.example.personalhealthassistantapp.presentation.activity
+package com.example.personalhealthassistantapp.presentation
 
-import android.os.Bundle
-import androidx.activity.ComponentActivity
-import androidx.activity.compose.setContent
-import androidx.activity.enableEdgeToEdge
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
@@ -29,92 +26,30 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalSoftwareKeyboardController
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import androidx.hilt.navigation.compose.hiltViewModel
-import androidx.navigation.NavController
-import androidx.navigation.NavHostController
-import androidx.navigation.compose.NavHost
-import androidx.navigation.compose.composable
-import androidx.navigation.compose.rememberNavController
 import com.example.personalhealthassistantapp.data.model.MessageModel
-import com.example.personalhealthassistantapp.presentation.ScreensName
-import com.example.personalhealthassistantapp.presentation.SplashScreen
-import com.example.personalhealthassistantapp.presentation.ui.PersonalHealthAssistantAppTheme
 import com.example.personalhealthassistantapp.presentation.ui.bot
 import com.example.personalhealthassistantapp.presentation.ui.user
 import com.example.personalhealthassistantapp.presentation.viewmodel.ChatViewModel
-import com.example.personalhealthassistantapp.presentation.welcomScreen.WelcomeScreenFirst
-import com.example.personalhealthassistantapp.presentation.welcomScreen.WelcomeScreenSecond
-import dagger.hilt.android.AndroidEntryPoint
 
-@AndroidEntryPoint
-class MainActivity : ComponentActivity() {
-    override fun onCreate(savedInstanceState: Bundle?) {
-        super.onCreate(savedInstanceState)
-        enableEdgeToEdge()
-        setContent {
-            val viewModel = hiltViewModel<ChatViewModel>()
-            PersonalHealthAssistantAppTheme {
-              NavigationGraph(viewModel)
-            }
-        }
-    }
-}
 
 @Composable
-fun NavigationGraph(viewModel: ChatViewModel) {
-    val navController  = rememberNavController()
-    NavHost(navController = navController, startDestination = ScreensName.SplashScreen.name) {
-        composable(ScreensName.SplashScreen.name){
-            SplashScreen(navController)
-        }
-        composable(ScreensName.ChatBotScreen.name){
-            ChatBoxScreen(navController, viewModel = viewModel)
-        }
-        composable(ScreensName.WelcomeScreen.name){
-            WelcomeScreenFirst(navController)
-        }
-        composable(ScreensName.WelcomeScreenSecond.name){
-            WelcomeScreenSecond(navController = navController)
-        }
-        composable(ScreensName.HomeScreen.name){
-
-        }
-        composable(ScreensName.LoginScreen.name){
-
-        }
-        composable(ScreensName.RegisterScreen.name){
-
-        }
-        composable(ScreensName.ForgotPasswordScreen.name){
-
-        }
-        composable(ScreensName.ResetPasswordScreen.name){
-
-        }
-    }
-}
-
-@Composable
-fun ChatBoxScreen(navController: NavController , viewModel: ChatViewModel) {
+fun ChatBotScreen(viewModel: ChatViewModel, innerPadding: PaddingValues) {
     Column(modifier = Modifier.fillMaxWidth()) {
         ChatBoxHeader()
         ChatBox(
             modifier = Modifier
-                .padding()
+                .padding(innerPadding)
                 .weight(1F),
             messageList = viewModel.messageList
         )
-        MessageInput{ question ->
+        MessageInput { question ->
             viewModel.sendMsg(question)
         }
     }
 }
-
-
 
 @Composable
 fun ChatBox(modifier: Modifier = Modifier, messageList: List<MessageModel>) {
@@ -180,6 +115,8 @@ fun MessageInput(sendMessage: (String) -> Unit) {
             }
         }) {
             Icon(imageVector = Icons.Default.Send, contentDescription = "Send")
+            //hide soft keyboard
+
 
         }
     }
@@ -191,8 +128,14 @@ fun ChatBoxHeader(modifier: Modifier = Modifier) {
     Box(
         modifier
             .fillMaxWidth()
-            .background(color = MaterialTheme.colorScheme.primary), contentAlignment = Alignment.CenterStart
+            .background(color = MaterialTheme.colorScheme.primary),
+        contentAlignment = Alignment.CenterStart
     ) {
-        Text(text = "Healthy Bot", modifier.padding(20.dp), color = Color.White, fontSize = 20.sp)
+        Text(
+            text = "Healthy Bot",
+            modifier.padding(20.dp),
+            color = Color.White,
+            fontSize = 20.sp
+        )
     }
 }
