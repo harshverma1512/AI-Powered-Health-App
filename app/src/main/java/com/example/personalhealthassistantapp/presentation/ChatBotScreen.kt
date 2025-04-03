@@ -27,8 +27,11 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalSoftwareKeyboardController
+import androidx.compose.ui.text.TextStyle
+import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import androidx.navigation.NavController
 import com.example.personalhealthassistantapp.data.model.MessageModel
 import com.example.personalhealthassistantapp.presentation.ui.bot
 import com.example.personalhealthassistantapp.presentation.ui.user
@@ -36,12 +39,11 @@ import com.example.personalhealthassistantapp.presentation.viewmodel.ChatViewMod
 
 
 @Composable
-fun ChatBotScreen(viewModel: ChatViewModel, innerPadding: PaddingValues) {
+fun ChatBotScreen(navController: NavController,  viewModel: ChatViewModel) {
     Column(modifier = Modifier.fillMaxWidth()) {
         ChatBoxHeader()
         ChatBox(
             modifier = Modifier
-                .padding(innerPadding)
                 .weight(1F),
             messageList = viewModel.messageList
         )
@@ -115,9 +117,6 @@ fun MessageInput(sendMessage: (String) -> Unit) {
             }
         }) {
             Icon(imageVector = Icons.Default.Send, contentDescription = "Send")
-            //hide soft keyboard
-
-
         }
     }
 }

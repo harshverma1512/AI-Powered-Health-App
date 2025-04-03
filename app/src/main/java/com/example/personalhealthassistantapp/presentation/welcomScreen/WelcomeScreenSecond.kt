@@ -69,78 +69,83 @@ fun WelcomeScreenSecond(modifier: Modifier = Modifier, navController: NavControl
         mutableIntStateOf(0)
     }
 
-    LaunchedEffect(whichScreen.intValue == 5) {
-        navController.navigate(ScreensName.HomeScreen.name)
-    }
-
-    Column(
-        modifier
-            .fillMaxSize()
-            .padding(top = 30.dp)
-    ) {
-
-        Row(
-            modifier = modifier
-                .padding(horizontal = 10.dp, vertical = 15.dp)
-                .fillMaxWidth(),
-            horizontalArrangement = Arrangement.SpaceBetween
+    if (whichScreen.intValue <= 4) {
+        Column(
+            modifier
+                .fillMaxSize()
+                .padding(top = 30.dp)
         ) {
-            ProgressWithSkip()
-        }
 
-        Text(
-            text = list[whichScreen.intValue],
-            fontWeight = FontWeight.Bold,
-            fontSize = 32.sp,
-            color = Color.Black,
-            style = TextStyle(lineHeight = 40.sp),
-            modifier = Modifier.padding(horizontal = 10.dp)
-        )
+            Row(
+                modifier = modifier
+                    .padding(horizontal = 10.dp, vertical = 15.dp)
+                    .fillMaxWidth(),
+                horizontalArrangement = Arrangement.SpaceBetween
+            ) {
+                ProgressWithSkip()
+            }
 
-        Spacer(modifier = modifier.height(10.dp))
-
-        Text(
-            text = list2[whichScreen.value],
-            fontSize = 18.sp,
-            color = Color.Gray,
-            style = TextStyle(lineHeight = 20.sp),
-            modifier = Modifier.padding(horizontal = 10.dp)
-        )
-
-        Spacer(modifier = modifier.weight(1f)) // Push everything up
-
-        Box(
-            modifier = modifier.fillMaxWidth()
-        ) {
-            Image(
-                painter = painterResource(id = imageList[whichScreen.intValue]),
-                contentDescription = "welcomeScreen Image",
-                modifier = Modifier.wrapContentHeight()
+            Text(
+                text = list[whichScreen.intValue],
+                fontWeight = FontWeight.Bold,
+                fontSize = 32.sp,
+                color = Color.Black,
+                style = TextStyle(lineHeight = 40.sp),
+                modifier = Modifier.padding(horizontal = 10.dp)
             )
 
-            Box(
-                modifier = modifier
-                    .padding(20.dp)
-                    .align(Alignment.BottomEnd)
-            ) {
-                Row(
-                    modifier = modifier
-                        .size(60.dp)
-                        .background(
-                            color = colorResource(id = R.color.btn_color),
-                            shape = RoundedCornerShape(10.dp)
-                        )
-                ) {
-                    Image(painter = painterResource(id = R.drawable.monotone_arrow_right_md),
-                        contentDescription = "moving forward",
-                        modifier = modifier
-                            .align(Alignment.CenterVertically)
-                            .fillMaxWidth()
-                            .clickable {
-                                whichScreen.intValue += 1
-                            })
-                }
+            Spacer(modifier = modifier.height(10.dp))
 
+            Text(
+                text = list2[whichScreen.value],
+                fontSize = 18.sp,
+                color = Color.Gray,
+                style = TextStyle(lineHeight = 20.sp),
+                modifier = Modifier.padding(horizontal = 10.dp)
+            )
+
+            Spacer(modifier = modifier.weight(1f)) // Push everything up
+
+            Box(
+                modifier = modifier.fillMaxWidth()
+            ) {
+                Image(
+                    painter = painterResource(id = imageList[whichScreen.intValue]),
+                    contentDescription = "welcomeScreen Image",
+                    modifier = Modifier.wrapContentHeight()
+                )
+
+                Box(
+                    modifier = modifier
+                        .padding(20.dp)
+                        .align(Alignment.BottomEnd)
+                ) {
+                    Row(
+                        modifier = modifier
+                            .size(60.dp)
+                            .background(
+                                color = colorResource(id = R.color.btn_color),
+                                shape = RoundedCornerShape(10.dp)
+                            )
+                    ) {
+                        Image(painter = painterResource(id = R.drawable.monotone_arrow_right_md),
+                            contentDescription = "moving forward",
+                            modifier = modifier
+                                .align(Alignment.CenterVertically)
+                                .fillMaxWidth()
+                                .clickable {
+                                    if (whichScreen.intValue == 4) {
+                                        navController.navigate(ScreensName.LoginScreen.name){
+                                            popUpTo(ScreensName.WelcomeScreen.name){
+                                                inclusive = true
+                                            }
+                                        }
+                                    } else {
+                                        whichScreen.intValue += 1
+                                    }
+                                })
+                    }
+                }
             }
         }
     }
