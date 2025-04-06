@@ -14,6 +14,8 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.res.painterResource
+import androidx.compose.ui.text.TextStyle
+import androidx.compose.ui.text.font.FontStyle
 import androidx.compose.ui.text.font.FontWeight.Companion.Bold
 import androidx.compose.ui.text.font.FontWeight.Companion.Normal
 import androidx.compose.ui.text.style.TextAlign
@@ -50,7 +52,7 @@ fun SplashScreen(navController: NavController) {
             fontSize = 16.sp,
             textAlign = TextAlign.Center,
             fontFamily = jakartaSansFontFamily,
-            fontWeight = Normal
+            fontWeight = Bold, color = Color.Black
         )
 
         LaunchedEffect(Unit) {

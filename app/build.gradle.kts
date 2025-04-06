@@ -87,6 +87,9 @@ dependencies {
     kapt(libs.hilt.android.compiler)
     implementation (libs.androidx.hilt.navigation.compose)
 
+    //Flow Layout
+    implementation("com.google.accompanist:accompanist-flowlayout:0.30.1")
+
 
     //Coroutines
     implementation(libs.kotlinx.coroutines.core)

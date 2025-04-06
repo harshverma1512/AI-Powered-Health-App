@@ -8,6 +8,7 @@ import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
+import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
@@ -82,7 +83,7 @@ fun WelcomeScreenSecond(modifier: Modifier = Modifier, navController: NavControl
                     .fillMaxWidth(),
                 horizontalArrangement = Arrangement.SpaceBetween
             ) {
-                ProgressWithSkip()
+                ProgressWithSkip(navController)
             }
 
             Text(
@@ -124,7 +125,7 @@ fun WelcomeScreenSecond(modifier: Modifier = Modifier, navController: NavControl
                         modifier = modifier
                             .size(60.dp)
                             .background(
-                                color = colorResource(id = R.color.btn_color),
+                                color = colorResource(id = R.color.welcome_box_color),
                                 shape = RoundedCornerShape(10.dp)
                             )
                     ) {
@@ -153,28 +154,32 @@ fun WelcomeScreenSecond(modifier: Modifier = Modifier, navController: NavControl
 
 
 @Composable
-fun ProgressWithSkip() {
+fun ProgressWithSkip(navController: NavController) {
     Row(
         modifier = Modifier
             .fillMaxWidth()
             .padding(vertical = 8.dp),
         verticalAlignment = Alignment.CenterVertically
     ) {
-        // Progress Bar
-        LinearProgressIndicator(
-            progress = 0.2f, // Adjust progress as needed
+        Box(
             modifier = Modifier
+                .height(6.dp)
                 .weight(1f)
-                .height(8.dp)
-                .clip(RoundedCornerShape(4.dp)), // Rounded corners
-            color = Color(0xFF1A2334), // Progress color
-            trackColor = Color(0xFFE0E4EA) // Track color
-        )
+                .padding(horizontal = 16.dp)
+                .background(Color.LightGray)
+        ) {
+            Box(
+                modifier = Modifier
+                    .fillMaxHeight()
+                    .fillMaxWidth(0.4f) // 40% progress – adjust as needed
+                    .background(Color.Black)
+            )
+        }
 
         // Skip Button
         Text(
             text = "Skip",
-            modifier = Modifier.padding(start = 16.dp),
+            modifier = Modifier.padding(start = 16.dp).clickable { navController.navigate(ScreensName.LoginScreen.name) },
             color = Color(0xFF1A2334),
             fontSize = 16.sp,
             fontWeight = FontWeight.Medium

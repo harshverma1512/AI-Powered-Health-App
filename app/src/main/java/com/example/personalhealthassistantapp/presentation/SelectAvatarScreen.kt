@@ -23,26 +23,31 @@ import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
+import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.res.colorResource
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import androidx.navigation.NavController
 import com.example.personalhealthassistantapp.R
 
 @Composable
-fun SelectAvatarScreen() {
+fun SelectAvatarScreen(navController: NavController) {
+
     Column(
         modifier = Modifier
             .fillMaxSize()
-            .background(Color(0xFFF5F7FE)) // Light background
+            .background(color = colorResource(id = R.color.backgroundColor))
             .padding(16.dp),
+        verticalArrangement = Arrangement.SpaceEvenly,
         horizontalAlignment = Alignment.CenterHorizontally
     ) {
         // Back Button
@@ -133,8 +138,8 @@ fun SelectAvatarScreen() {
 
         // Continue Button
         Button(
-            onClick = { /* Handle Continue */ },
-            colors = ButtonDefaults.buttonColors(containerColor = Color(0xFF406AFF)),
+            onClick = { navController.navigate(ScreensName.ProfileScreen.name) },
+            colors = ButtonDefaults.buttonColors(containerColor = colorResource(id = R.color.btn_color)),
             modifier = Modifier
                 .fillMaxWidth()
                 .padding(horizontal = 24.dp)
@@ -168,10 +173,4 @@ fun AvatarItem(selected: Boolean) {
             modifier = Modifier.size(70.dp)
         )
     }
-}
-
-@Preview
-@Composable
-fun PreviewSelectAvatarScreen() {
-    SelectAvatarScreen()
 }

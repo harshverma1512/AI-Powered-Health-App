@@ -95,7 +95,7 @@ fun LoginSignupScreen(
                 ) {
                     Image(
                         painter = painterResource(id = R.drawable.app_plus), // Replace with your drawable
-                        contentDescription = "Logo", modifier = modifier.size(40.dp)
+                        contentDescription = "Logo", modifier = modifier.size(60.dp)
                     )
                     Spacer(modifier = modifier.height(8.dp))
                     Text(
@@ -103,7 +103,7 @@ fun LoginSignupScreen(
                             R.string.sign_up_for_free
                         ),
                         color = Color.White,
-                        fontSize = 20.sp,
+                        fontSize = 25.sp,
                         fontWeight = FontWeight.ExtraBold,
                         fontFamily = FontFamily.Default
                     )
@@ -214,8 +214,7 @@ fun LoginSignupScreen(
                     Card(
                         colors = CardDefaults.cardColors(
                             containerColor = Color(0xFFFFF3F3), // Light pink background
-                        ),
-                        border = BorderStroke(1.dp, Color(0xFFFFC0C0)), // Light red border
+                        ), border = BorderStroke(1.dp, Color(0xFFFFC0C0)), // Light red border
                         shape = RoundedCornerShape(8.dp), // Rounded corners
                         modifier = Modifier.padding(16.dp)
                     ) {
@@ -239,25 +238,27 @@ fun LoginSignupScreen(
                     }
                 }
 
+            }
+
                 Button(
                     onClick = {
                         if (confirmPassword.value != password.value && !authenticationTypeLogin.value) {
                             matched.value = false
                             return@Button
                         }
-                        navController.navigate(ScreensName.ChatBotScreen.name)
+                        navController.navigate(ScreensName.SelectAvatarScreen.name)
                     },
                     modifier
                         .fillMaxWidth()
                         .height(75.dp)
                         .padding(top = 20.dp),
-                    colors = ButtonDefaults.buttonColors(Color.Blue),
+                    colors = ButtonDefaults.buttonColors(colorResource(id = R.color.btn_color)),
                     shape = RoundedCornerShape(10.dp)
                 ) {
                     Text(
                         text = if (authenticationTypeLogin.value) LocalContext.current.getString(R.string.sign_in) else LocalContext.current.getString(
                             R.string.sign_up
-                        ), fontWeight = FontWeight.Bold, fontSize = 18.sp
+                        ), fontWeight = FontWeight.Bold, color = Color.White,fontSize = 18.sp
                     )
                     Spacer(modifier = modifier.width(15.dp))
                     Image(
@@ -271,7 +272,7 @@ fun LoginSignupScreen(
                     append("Don't have an account? ")
                     withStyle(style = SpanStyle(color = Color.Red, fontWeight = FontWeight.Bold)) {
                         append(
-                            if (authenticationTypeLogin.value) LocalContext.current.getString(R.string.sign_in) else LocalContext.current.getString(
+                            if (!authenticationTypeLogin.value) LocalContext.current.getString(R.string.sign_in) else LocalContext.current.getString(
                                 R.string.sign_up
                             )
                         )
@@ -289,7 +290,7 @@ fun LoginSignupScreen(
                                 navController.navigate(ScreensName.RegisterScreen.name)
                             }
                         })
-            }
+
         }
     }
 }

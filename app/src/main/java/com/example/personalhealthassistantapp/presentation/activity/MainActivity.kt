@@ -10,9 +10,14 @@ import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
 import com.example.personalhealthassistantapp.presentation.ChatBotScreen
+import com.example.personalhealthassistantapp.presentation.HeightPickerScreen
+import com.example.personalhealthassistantapp.presentation.HomeScreen
 import com.example.personalhealthassistantapp.presentation.LoginSignupScreen
+import com.example.personalhealthassistantapp.presentation.ProfileScreen
 import com.example.personalhealthassistantapp.presentation.ScreensName
+import com.example.personalhealthassistantapp.presentation.SelectAvatarScreen
 import com.example.personalhealthassistantapp.presentation.SplashScreen
+import com.example.personalhealthassistantapp.presentation.WeightPickerScreen
 import com.example.personalhealthassistantapp.presentation.ui.PersonalHealthAssistantAppTheme
 import com.example.personalhealthassistantapp.presentation.viewmodel.ChatViewModel
 import com.example.personalhealthassistantapp.presentation.welcomScreen.WelcomeScreenFirst
@@ -50,7 +55,19 @@ fun NavigationGraph(viewModel: ChatViewModel) {
             WelcomeScreenSecond(navController = navController)
         }
         composable(ScreensName.HomeScreen.name) {
-
+            HomeScreen(navController = navController)
+        }
+        composable(ScreensName.WeightPickerScreen.name){
+            WeightPickerScreen(navController = navController)
+        }
+        composable(ScreensName.HeightPickerScreen.name){
+            HeightPickerScreen(navController = navController)
+        }
+        composable(ScreensName.ProfileScreen.name){
+            ProfileScreen(navController = navController)
+        }
+        composable(ScreensName.SelectAvatarScreen.name){
+            SelectAvatarScreen(navController = navController)
         }
         composable(ScreensName.LoginScreen.name) {
             LoginSignupScreen(authType = true , navController = navController)

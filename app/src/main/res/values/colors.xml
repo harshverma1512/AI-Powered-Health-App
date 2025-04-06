@@ -8,8 +8,9 @@
     <color name="black">#FF000000</color>
     <color name="white">#FFFFFFFF</color>
     <color name="app_bar_color">#0F67FE</color>
-    <color name="btn_color">#242E49</color>
+    <color name="welcome_box_color">#242E49</color>
     <color name="backgroundColor">#F2F5F9</color>
     <color name="grey">#9EA7B8</color>
     <color name="light_red">#EDA6A6</color>
+    <color name="btn_color">#FF406AFF</color>
 </resources>

@@ -18,6 +18,7 @@ import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.Text
+import androidx.compose.material3.TextFieldColors
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
@@ -27,11 +28,13 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalSoftwareKeyboardController
+import androidx.compose.ui.res.colorResource
 import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.navigation.NavController
+import com.example.personalhealthassistantapp.R
 import com.example.personalhealthassistantapp.data.model.MessageModel
 import com.example.personalhealthassistantapp.presentation.ui.bot
 import com.example.personalhealthassistantapp.presentation.ui.user
@@ -40,7 +43,10 @@ import com.example.personalhealthassistantapp.presentation.viewmodel.ChatViewMod
 
 @Composable
 fun ChatBotScreen(navController: NavController,  viewModel: ChatViewModel) {
-    Column(modifier = Modifier.fillMaxWidth()) {
+    Column(modifier = Modifier
+        .fillMaxWidth()
+        .background(color = colorResource(id = R.color.backgroundColor))
+    ) {
         ChatBoxHeader()
         ChatBox(
             modifier = Modifier
@@ -127,12 +133,13 @@ fun ChatBoxHeader(modifier: Modifier = Modifier) {
     Box(
         modifier
             .fillMaxWidth()
-            .background(color = MaterialTheme.colorScheme.primary),
+            .background(color = colorResource(id = R.color.btn_color)),
         contentAlignment = Alignment.CenterStart
     ) {
+
         Text(
-            text = "Healthy Bot",
-            modifier.padding(20.dp),
+            text = "Your Assistance",
+            modifier.padding(horizontal = 20.dp , vertical = 25.dp),
             color = Color.White,
             fontSize = 20.sp
         )
