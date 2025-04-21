@@ -12,7 +12,7 @@ import dagger.hilt.android.qualifiers.ApplicationContext
 import dagger.hilt.components.SingletonComponent
 import javax.inject.Singleton
 
-@Database(entities = [SleepHistoryModel::class], version = 1)
+@Database(entities = [SleepHistoryModel::class], version = 1, exportSchema = false )
 abstract class RoomDB : RoomDatabase(){
     abstract fun sleepDao(): SleepHistoryDao
 }
