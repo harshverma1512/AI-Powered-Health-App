@@ -6,6 +6,7 @@ import androidx.activity.compose.setContent
 import androidx.activity.enableEdgeToEdge
 import androidx.compose.runtime.Composable
 import androidx.hilt.navigation.compose.hiltViewModel
+import androidx.lifecycle.ViewModel
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
@@ -16,10 +17,12 @@ import com.example.personalhealthassistantapp.presentation.LoginSignupScreen
 import com.example.personalhealthassistantapp.presentation.ProfileScreen
 import com.example.personalhealthassistantapp.presentation.ScreensName
 import com.example.personalhealthassistantapp.presentation.SelectAvatarScreen
+import com.example.personalhealthassistantapp.presentation.SleepTrackingScreen
 import com.example.personalhealthassistantapp.presentation.SplashScreen
 import com.example.personalhealthassistantapp.presentation.WeightPickerScreen
 import com.example.personalhealthassistantapp.presentation.ui.PersonalHealthAssistantAppTheme
 import com.example.personalhealthassistantapp.presentation.viewmodel.ChatViewModel
+import com.example.personalhealthassistantapp.presentation.viewmodel.DataBaseViewModel
 import com.example.personalhealthassistantapp.presentation.welcomScreen.WelcomeScreenFirst
 import com.example.personalhealthassistantapp.presentation.welcomScreen.WelcomeScreenSecond
 import dagger.hilt.android.AndroidEntryPoint
@@ -28,20 +31,20 @@ import dagger.hilt.android.AndroidEntryPoint
 class MainActivity : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-        enableEdgeToEdge()
         setContent {
             val viewModel = hiltViewModel<ChatViewModel>()
+            val dataBaseViewModel = hiltViewModel<DataBaseViewModel>()
             PersonalHealthAssistantAppTheme {
-                NavigationGraph(viewModel)
+                NavigationGraph(viewModel , dataBaseViewModel)
             }
         }
     }
 }
 
 @Composable
-fun NavigationGraph(viewModel: ChatViewModel) {
+fun NavigationGraph(viewModel: ChatViewModel , dataBaseViewModel: DataBaseViewModel) {
     val navController = rememberNavController()
-    NavHost(navController = navController, startDestination = ScreensName.SplashScreen.name) {
+    NavHost(navController = navController, startDestination = ScreensName.HomeScreen.name) {
         composable(ScreensName.SplashScreen.name) {
             SplashScreen(navController)
         }
@@ -77,6 +80,9 @@ fun NavigationGraph(viewModel: ChatViewModel) {
         }
         composable(ScreensName.ForgotPasswordScreen.name) {
 
+        }
+        composable(ScreensName.SleepTrackingScreen.name){
+            SleepTrackingScreen(navController , dataBaseViewModel)
         }
         composable(ScreensName.ResetPasswordScreen.name) {
 

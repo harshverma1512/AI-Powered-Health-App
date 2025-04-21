@@ -25,6 +25,7 @@ import androidx.compose.ui.unit.sp
 import androidx.navigation.NavController
 import com.example.personalhealthassistantapp.R
 import com.example.personalhealthassistantapp.presentation.ui.jakartaSansFontFamily
+import com.example.personalhealthassistantapp.utility.SharedPrefManager
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
 
@@ -57,12 +58,19 @@ fun SplashScreen(navController: NavController) {
 
         LaunchedEffect(Unit) {
             delay(1500)
-            navController.navigate(ScreensName.WelcomeScreen.name){
-                popUpTo(ScreensName.SplashScreen.name){
-                    inclusive = true
+            if (SharedPrefManager(navController.context).isLoggedIn()){
+                navController.navigate(ScreensName.HomeScreen.name){
+                    popUpTo(ScreensName.SplashScreen.name){
+                        inclusive = true
+                    }
+                }
+            }else{
+                navController.navigate(ScreensName.WelcomeScreen.name){
+                    popUpTo(ScreensName.SplashScreen.name){
+                        inclusive = true
+                    }
                 }
             }
-
         }
     }
 }

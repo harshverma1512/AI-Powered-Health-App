@@ -95,8 +95,11 @@ fun WeightPickerScreen(
             .background(color = colorResource(id = R.color.backgroundColor))
             .padding(horizontal = 24.dp), verticalArrangement = Arrangement.SpaceAround
     ) {
-        WeightToolbar()
-
+        WeightToolbar(onBackClick = {
+                navController.popBackStack()
+        }, onSkipClick = {
+            navController.navigate(ScreensName.HomeScreen.name)
+        })
 
         Text(
             "What is your weight?",
@@ -208,7 +211,7 @@ fun WeightToolbar(
     onSkipClick: () -> Unit = {},
 ) {
     Row(
-        modifier = Modifier.fillMaxWidth().padding(top = 50.dp),
+        modifier = Modifier.fillMaxWidth(),
         verticalAlignment = Alignment.CenterVertically,
         horizontalArrangement = Arrangement.SpaceBetween
     ) {
@@ -235,9 +238,11 @@ fun WeightToolbar(
         }
         Text(
             text = "Skip",
-            modifier = Modifier.padding(start = 16.dp).clickable {
-                onSkipClick()
-            },
+            modifier = Modifier
+                .padding(start = 16.dp)
+                .clickable {
+                    onSkipClick()
+                },
             color = Color(0xFF1A2334),
             fontSize = 16.sp,
             fontWeight = FontWeight.Medium,

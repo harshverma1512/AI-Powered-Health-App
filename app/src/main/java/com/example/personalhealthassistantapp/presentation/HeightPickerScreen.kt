@@ -94,10 +94,13 @@ fun HeightPickerScreen(
             .fillMaxSize()
             .background(color = colorResource(id = R.color.backgroundColor))
             .padding(horizontal = 24.dp),
-        horizontalAlignment = Alignment.CenterHorizontally
+        horizontalAlignment = Alignment.CenterHorizontally, verticalArrangement = Arrangement.SpaceAround
     ) {
-        WeightToolbar()
-
+        WeightToolbar(onBackClick = {
+            navController.popBackStack()
+        }, onSkipClick = {
+            navController.navigate(ScreensName.HomeScreen.name)
+        })
         Spacer(modifier = Modifier.height(32.dp))
 
         Text("What is your height?", fontSize = 35.sp, fontWeight = FontWeight.Bold)

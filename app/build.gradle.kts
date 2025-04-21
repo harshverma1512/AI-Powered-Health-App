@@ -3,7 +3,8 @@ plugins {
     alias(libs.plugins.jetbrains.kotlin.android)
     alias(libs.plugins.compose.compiler)
     id("com.google.dagger.hilt.android") // Add Hilt plugin
-    id("kotlin-kapt") // Ensure kapt is enabled
+    id("kotlin-kapt")
+  //  alias(libs.plugins.google.gms.google.services) // Ensure kapt is enabled
 
 }
 
@@ -74,11 +75,22 @@ dependencies {
     debugImplementation(libs.androidx.ui.test.manifest)
     implementation(libs.androidx.compiler)
 
+    //Firebase
+  //  implementation(libs.firebase.auth)
+
     //ktor
     implementation(libs.ktor.client.android)
     implementation(libs.ktor.client.core)
     implementation(libs.ktor.client.serialization.jvm)
     implementation(libs.ktor.client.logging)
+
+    //Room
+    implementation(libs.androidx.room.runtime)
+    annotationProcessor(libs.room.compiler)
+    implementation(libs.androidx.room.ktx)
+    implementation(libs.androidx.room.paging)
+
+
 
     //Navigation
 
@@ -88,7 +100,7 @@ dependencies {
     implementation (libs.androidx.hilt.navigation.compose)
 
     //Flow Layout
-    implementation("com.google.accompanist:accompanist-flowlayout:0.30.1")
+    implementation(libs.accompanist.flowlayout)
 
 
     //Coroutines
