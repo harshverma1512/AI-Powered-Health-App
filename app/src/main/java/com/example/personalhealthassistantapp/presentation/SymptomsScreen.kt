@@ -24,12 +24,12 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import androidx.navigation.NavHostController
 import com.example.personalhealthassistantapp.R
 import com.google.accompanist.flowlayout.FlowRow
 
 @Composable
-@Preview(showBackground = true)
-fun SymptomsScreen() {
+fun SymptomsScreen(navController : NavHostController) {
     var text by remember { mutableStateOf("") }
     var symptoms by remember { mutableStateOf(listOf("Headache", "Muscle Fatigue")) }
 
@@ -44,8 +44,11 @@ fun SymptomsScreen() {
         Column(modifier = Modifier.padding(horizontal = 24.dp)
         ) {
             // Top Bar with progress and Skip
-            WeightToolbar()
-
+            WeightToolbar(onBackClick = {
+                navController.popBackStack()
+            }, onSkipClick = {
+                navController.navigate(ScreensName.HomeScreen.name)
+            })
             Spacer(modifier = Modifier.height(32.dp))
 
             // Title

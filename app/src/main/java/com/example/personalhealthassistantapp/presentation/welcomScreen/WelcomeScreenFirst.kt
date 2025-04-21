@@ -36,6 +36,7 @@ import androidx.compose.ui.unit.sp
 import androidx.navigation.NavController
 import com.example.personalhealthassistantapp.R
 import com.example.personalhealthassistantapp.presentation.ScreensName
+import com.example.personalhealthassistantapp.utility.SharedPrefManager
 
 @Composable
 fun WelcomeScreenFirst(navController: NavController) {
@@ -68,7 +69,14 @@ fun WelcomeScreenFirst(navController: NavController) {
         )
         Spacer(modifier = Modifier.height(18.dp))
         Button(
-            onClick = {navController.navigate(ScreensName.WelcomeScreenSecond.name)},
+            onClick = {
+                if (SharedPrefManager(navController.context).isFirstTimeOpenApp()) {
+                    navController.navigate(ScreensName.WelcomeScreenSecond.name)
+                    SharedPrefManager(navController.context).setFirstTimeOpenApp(false)
+                }else{
+                    navController.navigate(ScreensName.LoginScreen.name)
+                }
+            },
             colors = ButtonDefaults.buttonColors()
                 .copy(containerColor = colorResource(id = R.color.app_bar_color)),
             modifier = Modifier
