@@ -1,0 +1,29 @@
+{
+  "project_info": {
+    "project_number": "90507095699",
+    "project_id": "health-application-4e8db",
+    "storage_bucket": "health-application-4e8db.firebasestorage.app"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:90507095699:android:fa986a46903f848437a766",
+        "android_client_info": {
+          "package_name": "com.example.personalhealthassistantapp"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyAxxNAwFU04ILbQG2_C6sfNxNf7o-S-huA"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}

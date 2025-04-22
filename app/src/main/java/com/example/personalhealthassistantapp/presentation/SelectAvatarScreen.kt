@@ -1,5 +1,10 @@
 package com.example.personalhealthassistantapp.presentation
 
+import android.content.Context
+import android.net.Uri
+import android.widget.Toast
+import androidx.activity.compose.rememberLauncherForActivityResult
+import androidx.activity.result.contract.ActivityResultContracts
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
@@ -29,6 +34,7 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.colorResource
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.font.FontWeight
@@ -38,6 +44,8 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.navigation.NavController
 import com.example.personalhealthassistantapp.R
+import com.google.firebase.ktx.Firebase
+import com.google.firebase.storage.ktx.storage
 
 @Composable
 fun SelectAvatarScreen(navController: NavController) {
@@ -101,23 +109,7 @@ fun SelectAvatarScreen(navController: NavController) {
         Spacer(modifier = Modifier.height(20.dp))
 
         // Upload Image Section
-        Box(
-            modifier = Modifier
-                .size(100.dp)
-                .clickable {
-
-                }
-                .border(2.dp, Color(0xFF406AFF), RoundedCornerShape(12.dp))
-                .padding(24.dp),
-            contentAlignment = Alignment.Center
-        ) {
-            Icon(
-                imageVector = Icons.Default.Add,
-                contentDescription = "Upload",
-                tint = Color(0xFF406AFF),
-                modifier = Modifier.size(30.dp)
-            )
-        }
+        ProfileImageUploader()
 
         Spacer(modifier = Modifier.height(15.dp))
 
@@ -152,6 +144,54 @@ fun SelectAvatarScreen(navController: NavController) {
         }
     }
 }
+
+
+@Composable
+fun ProfileImageUploader() {
+    val context = LocalContext.current
+    val storage = Firebase.storage
+    val launcher = rememberLauncherForActivityResult(ActivityResultContracts.GetContent()) { uri ->
+        uri?.let {
+            uploadImageToFirebase(uri, context)
+        }
+    }
+
+    Box(
+        modifier = Modifier
+            .size(100.dp)
+            .clickable {
+                launcher.launch("image/*")
+            }
+            .border(2.dp, Color(0xFF406AFF), RoundedCornerShape(12.dp))
+            .padding(24.dp),
+        contentAlignment = Alignment.Center
+    ) {
+        Icon(
+            imageVector = Icons.Default.Add,
+            contentDescription = "Upload",
+            tint = Color(0xFF406AFF),
+            modifier = Modifier.size(30.dp)
+        )
+    }
+}
+
+fun uploadImageToFirebase(uri: Uri, context: Context) {
+    val storage = Firebase.storage
+    val storageRef = storage.reference
+    val imageRef = storageRef.child("profile_images/${System.currentTimeMillis()}.jpg")
+
+    val uploadTask = imageRef.putFile(uri)
+
+    uploadTask.addOnSuccessListener {
+        imageRef.downloadUrl.addOnSuccessListener { downloadUri ->
+            Toast.makeText(context, "Uploaded Successfully! URL: $downloadUri", Toast.LENGTH_SHORT).show()
+            // Optionally, save this URL to Firestore or Realtime DB
+        }
+    }.addOnFailureListener {
+        Toast.makeText(context, "Upload Failed: ${it.message}", Toast.LENGTH_SHORT).show()
+    }
+}
+
 
 @Composable
 fun AvatarItem(selected: Boolean) {
