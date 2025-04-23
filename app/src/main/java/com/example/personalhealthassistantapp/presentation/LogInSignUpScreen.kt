@@ -253,12 +253,15 @@ fun LoginSignupScreen(
                 onClick = {
                     if (!authenticationTypeLogin.value && password.value != confirmPassword.value) {
                         matched.value = false
+                        Toast.makeText(context, " Confirm Password must be Same as Password!", Toast.LENGTH_SHORT).show()
                         return@Button
                     }
-                    if (authenticationTypeLogin.value) {
+                    if (authenticationTypeLogin.value && password.value.isNotEmpty() && email.value.isNotEmpty()){
                         login(context, email.value.trim(), password.value.trim(), navController)
-                    } else {
+                    } else if (password.value.isNotEmpty() && email.value.isNotEmpty() && confirmPassword.value.isNotEmpty() && !authenticationTypeLogin.value) {
                         signup(context, email.value.trim(), password.value.trim(), navController)
+                    }else{
+                        Toast.makeText(context, "Please Fill All Fields", Toast.LENGTH_SHORT).show()
                     }
                 },
                 modifier
@@ -334,7 +337,7 @@ private fun signup(
     password: String,
     navController: NavController,
 ) {
-    Firebase.auth.createUserWithEmailAndPassword(email, password)
+   auth.createUserWithEmailAndPassword(email, password)
         .addOnCompleteListener { task ->
             if (task.isSuccessful) {
                 Toast.makeText(context, "Signup Successful!", Toast.LENGTH_SHORT).show()

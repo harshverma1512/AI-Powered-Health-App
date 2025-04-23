@@ -125,7 +125,7 @@ fun WeightPickerScreen(
             Spacer(Modifier.height(150.dp))
 
             Text(
-                "$selectedWeight ${selectedUnit}",
+                "$selectedWeight $selectedUnit",
                 fontSize = 48.sp,
                 fontWeight = FontWeight.Bold,
                 color = colorResource(id = R.color.black)

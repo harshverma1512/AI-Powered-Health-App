@@ -147,7 +147,7 @@ fun SleepHistoryCard(sleepHistoryModel: SleepHistoryModel) {
                     fontWeight = FontWeight.SemiBold,
                     color = Color.Gray
                 )
-                Text(sleepHistoryModel.sleepDuration.toString(), fontWeight = FontWeight.Bold)
+                Text("Sleeping Hours ${sleepHistoryModel.sleepDuration}", fontWeight = FontWeight.Bold)
             }
             sleepHistoryModel.sleepType?.let {
                 Text(

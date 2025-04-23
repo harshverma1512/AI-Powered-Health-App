@@ -15,6 +15,8 @@ import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import android.provider.Settings
+import android.util.Log
+import android.widget.Toast
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import java.time.format.DateTimeFormatter
@@ -27,7 +29,6 @@ import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.ArrowDropDown
 import androidx.compose.material.icons.filled.DateRange
-import androidx.compose.material.icons.filled.Favorite
 import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.Icon
@@ -52,9 +53,10 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.example.personalhealthassistantapp.R
+import com.example.personalhealthassistantapp.data.model.AlarmModel
 import com.example.personalhealthassistantapp.data.model.SleepHistoryModel
-import com.example.personalhealthassistantapp.utility.Utils.requestExactAlarmPermission
-import com.example.personalhealthassistantapp.utility.Utils.scheduleAlarm
+import com.example.personalhealthassistantapp.domain.repository.AndroidAlarmScheduler
+import com.example.personalhealthassistantapp.utility.SharedPrefManager
 import java.time.DayOfWeek
 import java.time.LocalDate
 import java.time.LocalDateTime
@@ -242,8 +244,8 @@ fun FilterSleepSheetContent(onDismiss: (SleepHistoryModel) -> Unit) {
     var sleepTime by remember { mutableStateOf(LocalTime.of(23, 0)) }
     var wakeTime by remember { mutableStateOf(LocalTime.of(7, 0)) }
     val context = LocalContext.current
-    val selectedDays = remember { mutableStateOf(setOf(LocalDate.now().dayOfWeek)) }
-
+    val selectedDays = remember { mutableStateOf(setOf<DayOfWeek>()) } // Keep track of selected days
+    val alarmScheduler = AndroidAlarmScheduler(context)
 
     Column(
         modifier = Modifier
@@ -318,6 +320,13 @@ fun FilterSleepSheetContent(onDismiss: (SleepHistoryModel) -> Unit) {
 
         Button(
             onClick = {
+                val sharedPrefManager = SharedPrefManager(context)
+                sharedPrefManager.saveSleepTime(sleepTime.hour, sleepTime.minute)
+                sharedPrefManager.saveWakeTime(wakeTime.hour, wakeTime.minute)
+
+                alarmScheduler.schedule(AlarmModel(LocalDateTime.of(sleepDate, sleepTime), "Sleeping Time"))
+             //   alarmScheduler.schedule(AlarmModel(LocalDateTime.of(sleepDate, wakeTime), "WakeUp Time"))
+
                 onDismiss(
                     SleepHistoryModel(
                         0,
@@ -326,24 +335,6 @@ fun FilterSleepSheetContent(onDismiss: (SleepHistoryModel) -> Unit) {
                         sleepType = selectedType
                     )
                 )
-                var alarmDateTime = LocalDateTime.of(sleepDate, sleepTime)
-                if (alarmDateTime.isBefore(LocalDateTime.now())) {
-                    alarmDateTime = alarmDateTime.plusDays(1)
-                }
-                if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.S) {
-                    val alarmManager = context.getSystemService(Context.ALARM_SERVICE) as AlarmManager
-                    if (!alarmManager.canScheduleExactAlarms()) {
-                        val intent = Intent(Settings.ACTION_REQUEST_SCHEDULE_EXACT_ALARM)
-                        context.startActivity(intent)
-                    } else {
-                        // Proceed with scheduling the alarm
-                        scheduleAlarm(context, alarmDateTime, selectedDays.value, selectedType)
-                    }
-                } else {
-                    // For Android 11 or below, permission is automatically granted
-                    scheduleAlarm(context, alarmDateTime, selectedDays.value, selectedType)
-                }
-
             },
             modifier = Modifier.fillMaxWidth(),
             colors = ButtonDefaults.buttonColors(containerColor = colorResource(R.color.btn_color))
@@ -353,12 +344,27 @@ fun FilterSleepSheetContent(onDismiss: (SleepHistoryModel) -> Unit) {
     }
 }
 
+
+@RequiresApi(Build.VERSION_CODES.O)
 @Composable
 fun RepeatDaysSelector(
     selectedDays: Set<DayOfWeek>,
     onDayToggle: (DayOfWeek) -> Unit
 ) {
+    val context = LocalContext.current
+
+    val today = LocalDate.now().dayOfWeek
+
+    val initialSelectedDays = remember {
+        if (selectedDays.isEmpty()) {
+            mutableSetOf(today)
+        } else {
+            selectedDays.toMutableSet()
+        }
+    }
+
     val dayLabels = listOf("Mon", "Tue", "Wed", "Thu", "Fri", "Sat", "Sun")
+    val daysOfWeek = DayOfWeek.entries.toTypedArray()
 
     Row(
         modifier = Modifier
@@ -366,8 +372,8 @@ fun RepeatDaysSelector(
             .padding(top = 8.dp),
         horizontalArrangement = Arrangement.SpaceEvenly
     ) {
-        DayOfWeek.values().forEachIndexed { index, day ->
-            val isSelected = selectedDays.contains(day)
+        daysOfWeek.forEachIndexed { index, day ->
+            val isSelected = initialSelectedDays.contains(day)
 
             Box(
                 contentAlignment = Alignment.Center,
@@ -379,7 +385,16 @@ fun RepeatDaysSelector(
                         color = if (isSelected) colorResource(R.color.btn_color) else Color.LightGray,
                         shape = RoundedCornerShape(12.dp)
                     )
-                    .clickable { onDayToggle(day) }
+                    .clickable {
+                        if (isSelected) {
+                            initialSelectedDays.remove(day)
+                        } else {
+                            initialSelectedDays.add(day)
+                        }
+
+                        onDayToggle(day)
+                        SharedPrefManager(context).saveSelectedDays(initialSelectedDays)
+                    }
                     .padding(horizontal = 12.dp, vertical = 8.dp)
             ) {
                 Text(
