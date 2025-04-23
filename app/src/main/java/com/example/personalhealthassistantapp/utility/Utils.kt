@@ -13,6 +13,16 @@ object Utils {
 
     const val GEMINI_KEY = "AIzaSyBdEME3G08fi4tMdMLIasIQjeVuUfv2IDE"
 
+    fun getGreeting(): String {
+        val hour = java.util.Calendar.getInstance().get(java.util.Calendar.HOUR_OF_DAY)
+        return when (hour) {
+            in 5..11 -> "Good Morning 🌞"
+            in 12..16 -> "Good Afternoon ☀️"
+            in 17..20 -> "Good Evening 🌇"
+            else -> "Good Night 🌙"
+        }
+    }
+
 
     @Composable
     fun BackBtn(

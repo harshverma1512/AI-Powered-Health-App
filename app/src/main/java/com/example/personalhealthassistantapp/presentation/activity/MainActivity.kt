@@ -22,7 +22,6 @@ import com.example.personalhealthassistantapp.presentation.HomeScreen
 import com.example.personalhealthassistantapp.presentation.LoginSignupScreen
 import com.example.personalhealthassistantapp.presentation.ProfileScreen
 import com.example.personalhealthassistantapp.presentation.ScreensName
-import com.example.personalhealthassistantapp.presentation.SelectAvatarScreen
 import com.example.personalhealthassistantapp.presentation.SleepTrackingScreen
 import com.example.personalhealthassistantapp.presentation.SplashScreen
 import com.example.personalhealthassistantapp.presentation.WeightPickerScreen
@@ -73,7 +72,7 @@ class MainActivity : ComponentActivity() {
     @Composable
     fun NavigationGraph(viewModel: ChatViewModel, dataBaseViewModel: DataBaseViewModel) {
         val navController = rememberNavController()
-        NavHost(navController = navController, startDestination = ScreensName.HomeScreen.name) {
+        NavHost(navController = navController, startDestination = ScreensName.SplashScreen.name) {
             composable(ScreensName.SplashScreen.name) {
                 SplashScreen(navController)
             }
@@ -97,9 +96,6 @@ class MainActivity : ComponentActivity() {
             }
             composable(ScreensName.ProfileScreen.name) {
                 ProfileScreen(navController = navController)
-            }
-            composable(ScreensName.SelectAvatarScreen.name) {
-                SelectAvatarScreen(navController = navController)
             }
             composable(ScreensName.LoginScreen.name) {
                 LoginSignupScreen(authType = true, navController = navController)

@@ -1,8 +1,14 @@
 package com.example.personalhealthassistantapp.presentation
 
+import android.content.Context
+import android.net.Uri
+import android.widget.Toast
+import androidx.activity.compose.rememberLauncherForActivityResult
+import androidx.activity.result.contract.ActivityResultContracts
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -11,6 +17,7 @@ import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
+import coil.compose.rememberAsyncImagePainter
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
@@ -34,6 +41,7 @@ import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
@@ -42,6 +50,7 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.colorResource
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.input.KeyboardType
@@ -49,16 +58,54 @@ import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.navigation.NavController
 import com.example.personalhealthassistantapp.R
-
+import com.google.firebase.auth.FirebaseAuth
+import com.google.firebase.auth.userProfileChangeRequest
+import com.google.firebase.firestore.ktx.firestore
+import com.google.firebase.ktx.Firebase
 
 @Composable
 fun ProfileScreen(navController: NavController) {
+    val context = LocalContext.current
+    val db = Firebase.firestore
+    val user = FirebaseAuth.getInstance().currentUser
+    val userId = user?.uid ?: return
 
-    var fullName by remember { mutableStateOf("Sanae Dekomori") }
-    var phoneNumber by remember { mutableStateOf("+123 456 78") }
-    var email by remember { mutableStateOf("dekomori@fuwa.jp") }
+    var fullName by remember { mutableStateOf(user.displayName ?: "") }
+    var phoneNumber by remember { mutableStateOf("") }
+    var email by remember { mutableStateOf(user.email ?: "") }
     var selectedAccountType by remember { mutableStateOf("Patient") }
-    val accountTypes = listOf("Regular", "Patient", "Physician")
+    var imageUri by remember { mutableStateOf<Uri?>(null) }
+    val launcher = rememberLauncherForActivityResult(ActivityResultContracts.GetContent()) { uri ->
+        uri?.let {
+            imageUri = it
+        }
+    }
+
+
+    LaunchedEffect(Unit) {
+        user?.let {
+            fullName = it.displayName ?: ""
+            email = it.email ?: ""
+
+            // Load extended user info from Firestore
+            db.collection("users").document(userId).get()
+                .addOnSuccessListener { document ->
+                    if (document.exists()) {
+                        phoneNumber = document.getString("phone") ?: ""
+                        selectedAccountType = document.getString("accountType") ?: "Patient"
+
+                        val photoUrl = document.getString("photoUrl")
+                        if (!photoUrl.isNullOrEmpty()) {
+                            imageUri = Uri.parse(photoUrl)
+                        }
+                    }
+                }
+                .addOnFailureListener {
+                    Toast.makeText(context, "Error fetching user data", Toast.LENGTH_SHORT).show()
+                }
+        }
+    }
+
 
     Column(
         modifier = Modifier
@@ -74,9 +121,13 @@ fun ProfileScreen(navController: NavController) {
 
         Spacer(modifier = Modifier.height(16.dp))
 
-        Box(contentAlignment = Alignment.Center) {
+        Box(contentAlignment = Alignment.Center, modifier = Modifier.clickable {
+            launcher.launch("image/*")
+        }) {
             Image(
-                painter = painterResource(R.drawable.health_plus), // replace with actual image
+                painter = if (imageUri != null)
+                    rememberAsyncImagePainter(imageUri)
+                else painterResource(R.drawable.health_plus), // Default image
                 contentDescription = "Profile",
                 modifier = Modifier
                     .size(96.dp)
@@ -126,7 +177,6 @@ fun ProfileScreen(navController: NavController) {
             modifier = Modifier.fillMaxWidth()
         )
 
-
         Spacer(modifier = Modifier.height(16.dp))
 
         Text("Account Type", style = MaterialTheme.typography.labelMedium)
@@ -135,7 +185,7 @@ fun ProfileScreen(navController: NavController) {
             modifier = Modifier.fillMaxWidth().padding(top = 10.dp),
             horizontalArrangement = Arrangement.SpaceEvenly
         ) {
-            accountTypes.forEach { type ->
+            listOf("Regular", "Patient", "Physician").forEach { type ->
                 val isSelected = selectedAccountType == type
                 Button(
                     onClick = { selectedAccountType = type },
@@ -152,7 +202,10 @@ fun ProfileScreen(navController: NavController) {
         Spacer(modifier = Modifier.height(24.dp))
 
         Button(
-            onClick = { navController.navigate(ScreensName.WeightPickerScreen.name)},
+            onClick = {
+                saveUserProfile(fullName,phoneNumber, email, selectedAccountType ,
+                    imageUri.toString(),context)
+            },
             modifier = Modifier
                 .fillMaxWidth()
                 .height(50.dp),
@@ -164,8 +217,56 @@ fun ProfileScreen(navController: NavController) {
             Image(
                 painter = painterResource(id = R.drawable.monotone_arrow_right_md),
                 contentDescription = ""
-            )        }
+            )
+        }
 
         Spacer(modifier = Modifier.height(16.dp))
     }
+}
+
+fun saveUserProfile(
+    fullName: String,
+    phoneNumber: String,
+    email: String,
+    accountType: String,
+    imageUrl: String?,
+    context: Context
+) {
+    val user = FirebaseAuth.getInstance().currentUser
+    val db = Firebase.firestore
+
+    val userId = user?.uid ?: return
+
+    val userData = hashMapOf(
+        "fullName" to fullName,
+        "phone" to phoneNumber,
+        "email" to email,
+        "accountType" to accountType,
+        "photoUrl" to (imageUrl ?: "")
+    )
+
+    // Update Auth display name
+    val profileUpdates = userProfileChangeRequest {
+        displayName = fullName
+        if (!imageUrl.isNullOrEmpty()) {
+            photoUri = Uri.parse(imageUrl)
+        }
+    }
+
+    user.updateProfile(profileUpdates)
+        .addOnCompleteListener { task ->
+            if (task.isSuccessful) {
+                // Save to Firestore
+                db.collection("users").document(userId)
+                    .set(userData)
+                    .addOnSuccessListener {
+                        Toast.makeText(context, "Profile updated successfully!", Toast.LENGTH_SHORT).show()
+                    }
+                    .addOnFailureListener {
+                        Toast.makeText(context, "Failed to save profile: ${it.message}", Toast.LENGTH_SHORT).show()
+                    }
+            } else {
+                Toast.makeText(context, "Failed to update auth profile", Toast.LENGTH_SHORT).show()
+            }
+        }
 }
