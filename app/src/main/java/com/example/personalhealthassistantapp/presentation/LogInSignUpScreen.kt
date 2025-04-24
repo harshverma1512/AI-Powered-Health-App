@@ -49,13 +49,12 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.navigation.NavController
 import com.example.personalhealthassistantapp.R
+import com.example.personalhealthassistantapp.utility.SharedPrefManager
 import com.google.firebase.Firebase
 import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.auth.auth
 
-
 private var auth: FirebaseAuth = Firebase.auth
-
 
 @Composable
 fun LoginSignupScreen(
@@ -322,6 +321,7 @@ private fun login(
         .addOnCompleteListener { task ->
             if (task.isSuccessful) {
                 Toast.makeText(context, "Login Successful!", Toast.LENGTH_SHORT).show()
+                SharedPrefManager(context).saveLoginStatus(true)
                 navController.navigate(ScreensName.HomeScreen.name)
             } else {
                 Toast.makeText(context, "Login Failed: ${task.exception?.message}", Toast.LENGTH_SHORT).show()
@@ -341,7 +341,8 @@ private fun signup(
         .addOnCompleteListener { task ->
             if (task.isSuccessful) {
                 Toast.makeText(context, "Signup Successful!", Toast.LENGTH_SHORT).show()
-                navController.navigate(ScreensName.SelectAvatarScreen.name)
+                navController.navigate(ScreensName.ProfileScreen.name)
+                SharedPrefManager(context).saveLoginStatus(true)
             } else {
                 Toast.makeText(context, "Signup Fail!", Toast.LENGTH_SHORT).show()
             }

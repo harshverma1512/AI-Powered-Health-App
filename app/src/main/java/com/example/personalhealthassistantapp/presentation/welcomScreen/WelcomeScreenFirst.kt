@@ -70,10 +70,18 @@ fun WelcomeScreenFirst(navController: NavController) {
         Spacer(modifier = Modifier.height(18.dp))
         Button(
             onClick = {
-                if (SharedPrefManager(navController.context).isFirstTimeOpenApp()) {
+                if (SharedPrefManager(navController.context).isFirstTimeOpenApp() && !SharedPrefManager(
+                        navController.context
+                    ).isLoggedIn()
+                ) {
                     navController.navigate(ScreensName.WelcomeScreenSecond.name)
                     SharedPrefManager(navController.context).setFirstTimeOpenApp(false)
-                }else{
+                } else if (!SharedPrefManager(navController.context).isFirstTimeOpenApp() && SharedPrefManager(
+                        navController.context
+                    ).isLoggedIn()
+                ) {
+                    navController.navigate(ScreensName.HomeScreen.name)
+                } else {
                     navController.navigate(ScreensName.LoginScreen.name)
                 }
             },

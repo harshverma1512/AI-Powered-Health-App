@@ -97,12 +97,11 @@ dependencies {
     annotationProcessor(libs.room.compiler)
     implementation(libs.androidx.room.ktx)
     implementation(libs.androidx.room.paging)
-    kapt (libs.room.compiler)
+    kapt(libs.room.compiler)
 
+    //coil
+    implementation(libs.coil.compose)
 
-
-
-    //Navigation
 
     //Hilt
     implementation(libs.hilt.android)

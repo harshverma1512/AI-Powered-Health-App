@@ -25,7 +25,10 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.navigation.NavController
 import androidx.navigation.NavHostController
+import coil.compose.AsyncImage
 import com.example.personalhealthassistantapp.R
+import com.example.personalhealthassistantapp.utility.Utils.getGreeting
+import com.google.firebase.auth.FirebaseAuth
 
 @Composable
 fun HomeScreen(navController: NavController) {
@@ -51,6 +54,10 @@ fun HomeScreen(navController: NavController) {
 
 @Composable
 fun TopBarSection(navController: NavController) {
+    val user = FirebaseAuth.getInstance().currentUser
+    val displayName = user?.displayName ?: "User"
+    val photoUrl = user?.photoUrl
+
     Column {
         Row(
             verticalAlignment = Alignment.CenterVertically,
@@ -58,17 +65,29 @@ fun TopBarSection(navController: NavController) {
             modifier = Modifier.fillMaxWidth()
         ) {
             Row(verticalAlignment = Alignment.CenterVertically) {
-                Box(modifier = Modifier
-                    .clickable {
-                        navController.navigate(ScreensName.ProfileScreen.name)
+                Box(
+                    modifier = Modifier
+                        .clickable {
+                            navController.navigate(ScreensName.ProfileScreen.name)
+                        }
+                        .size(48.dp)
+                        .clip(CircleShape)
+                        .background(Color.Gray)
+                ) {
+                    photoUrl?.let {
+                        AsyncImage(
+                            model = it,
+                            contentDescription = "Profile Image",
+                            modifier = Modifier
+                                .fillMaxSize()
+                                .clip(CircleShape)
+                        )
                     }
-                    .size(48.dp)
-                    .clip(CircleShape)
-                    .background(Color.Gray))
+                }
                 Spacer(modifier = Modifier.width(8.dp))
                 Column {
-                    Text("Hi, Harsh! 👋", fontWeight = FontWeight.Bold)
-                    Text("Good morning 🌞", style = MaterialTheme.typography.bodySmall)
+                    Text("Hi, $displayName! 👋", fontWeight = FontWeight.Bold)
+                    Text(getGreeting(), style = MaterialTheme.typography.bodySmall)
                 }
             }
             Icon(Icons.Default.Notifications, contentDescription = null, modifier = Modifier.clickable {
@@ -88,6 +107,7 @@ fun TopBarSection(navController: NavController) {
         )
     }
 }
+
 
 @Composable
 fun HealthScoreSection(navController: NavController) {

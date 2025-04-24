@@ -46,6 +46,7 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.navigation.NavController
 import com.example.personalhealthassistantapp.R
+import com.google.firebase.Firebase
 
 
 @Composable
@@ -185,7 +186,7 @@ fun WeightPickerScreen(
         }
 
         Button(
-            onClick = {navController.navigate(ScreensName.HeightPickerScreen.name) },
+            onClick = { navController.navigate(ScreensName.HeightPickerScreen.name) },
             modifier = Modifier
                 .fillMaxWidth()
                 .height(50.dp),
