@@ -325,7 +325,7 @@ fun FilterSleepSheetContent(onDismiss: (SleepHistoryModel) -> Unit) {
                 sharedPrefManager.saveWakeTime(wakeTime.hour, wakeTime.minute)
 
                 alarmScheduler.schedule(AlarmModel(LocalDateTime.of(sleepDate, sleepTime), "Sleeping Time"))
-             //   alarmScheduler.schedule(AlarmModel(LocalDateTime.of(sleepDate, wakeTime), "WakeUp Time"))
+                alarmScheduler.schedule(AlarmModel(LocalDateTime.of(sleepDate, wakeTime), "WakeUp Time"))
 
                 onDismiss(
                     SleepHistoryModel(

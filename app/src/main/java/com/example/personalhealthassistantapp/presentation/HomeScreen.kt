@@ -1,5 +1,6 @@
 package com.example.personalhealthassistantapp.presentation
 
+import android.util.Log
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
@@ -12,6 +13,7 @@ import androidx.compose.material.icons.filled.Notifications
 import androidx.compose.material.icons.filled.Search
 import androidx.compose.material3.*
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.*
 import androidx.compose.ui.draw.clip
@@ -20,18 +22,21 @@ import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.res.colorResource
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.font.FontWeight
-import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.navigation.NavController
-import androidx.navigation.NavHostController
 import coil.compose.AsyncImage
 import com.example.personalhealthassistantapp.R
+import com.example.personalhealthassistantapp.presentation.viewmodel.ChatViewModel
 import com.example.personalhealthassistantapp.utility.Utils.getGreeting
 import com.google.firebase.auth.FirebaseAuth
+import kotlin.random.Random
 
 @Composable
-fun HomeScreen(navController: NavController) {
+fun HomeScreen(navController: NavController,  chatViewModel: ChatViewModel) {
+
+    val score = chatViewModel.score
+
      Column(
         modifier = Modifier
             .fillMaxSize()
@@ -43,7 +48,7 @@ fun HomeScreen(navController: NavController) {
             verticalArrangement = Arrangement.spacedBy(16.dp)
         ) {
             item { TopBarSection(navController) }
-            item { HealthScoreSection(navController) }
+            item { HealthScoreSection(score, navController) }
             item { VitalsSection(navController) }
             item { FitnessTrackerSection(navController) }
             item { WellnessChatbotSection(navController) }
@@ -110,17 +115,68 @@ fun TopBarSection(navController: NavController) {
 
 
 @Composable
-fun HealthScoreSection(navController: NavController) {
-    Card(
-        modifier = Modifier.fillMaxWidth(),
-        colors = CardDefaults.cardColors(containerColor = Color.White),
-        shape = RoundedCornerShape(16.dp)
-    ) {
-        Column(modifier = Modifier.padding(16.dp)) {
-            Text("Health Score", fontWeight = FontWeight.Bold)
-            Spacer(modifier = Modifier.height(8.dp))
-            Text("88", fontSize = 32.sp, color = Color(0xFF6C63FF), fontWeight = FontWeight.Bold)
-            Text("Awesome! Keep it up.")
+fun HealthScoreSection(score : Int? , navController: NavController) {
+    val randomColor = remember {
+        Color(
+            red = Random.nextFloat(),
+            green = Random.nextFloat(),
+            blue = Random.nextFloat(),
+            alpha = 1f
+        )
+    }
+
+    Card(modifier = Modifier
+        .fillMaxWidth()
+        .wrapContentHeight(),
+        shape = RoundedCornerShape(16.dp),
+        elevation = CardDefaults.cardElevation(defaultElevation = 4.dp),
+        colors = CardDefaults.cardColors(containerColor = Color(0xFFF7F9FC))) {
+        Row(
+            modifier = Modifier
+                .clip(RoundedCornerShape(16.dp))
+                .background(Color(0xFFF5F7FA))
+                .padding(16.dp),
+            verticalAlignment = Alignment.CenterVertically
+        ) {
+            // Score box with loading state
+            Box(
+                modifier = Modifier
+                    .size(64.dp)
+                    .clip(RoundedCornerShape(16.dp))
+                    .background(randomColor),
+                contentAlignment = Alignment.Center
+            ) {
+                if (score != null) {
+                    Text(
+                        text = score.toString(),
+                        fontSize = 22.sp,
+                        fontWeight = FontWeight.Bold,
+                        color = Color.White
+                    )
+                } else {
+                    CircularProgressIndicator(
+                        color = Color.White,
+                        strokeWidth = 3.dp,
+                        modifier = Modifier.size(24.dp)
+                    )
+                }
+            }
+
+            Spacer(modifier = Modifier.width(16.dp))
+
+            Column {
+                Text(
+                    text = "Health Score",
+                    fontSize = 16.sp,
+                    fontWeight = FontWeight.Bold,
+                    color = Color(0xFF1E1E1E)
+                )
+                Text(
+                    text = "Based on your data, we think your\nhealth BMI status is above average.",
+                    fontSize = 14.sp,
+                    color = Color.Gray
+                )
+            }
         }
     }
 }
@@ -183,6 +239,7 @@ fun StepsTakenCard(
 ) {
     Card(
         modifier = Modifier
+            .clickable { navController.navigate(ScreensName.MedicationManagement.name) }
             .fillMaxWidth()
             .height(80.dp),
         shape = RoundedCornerShape(16.dp),
@@ -244,6 +301,7 @@ fun HydrationCard(
 
     Card(
         modifier = Modifier
+            .clickable { navController.navigate(ScreensName.HydrationScreen.name) }
             .fillMaxWidth()
             .height(80.dp),
         shape = RoundedCornerShape(16.dp),

@@ -1,5 +1,7 @@
 package com.example.personalhealthassistantapp.data.model
 
+import kotlinx.serialization.Serializable
 import java.time.LocalDateTime
 
-data class AlarmModel (val time : LocalDateTime, val message : String)
+@Serializable
+data class AlarmModel(@Serializable val time: LocalDateTime, @Serializable val message: String)

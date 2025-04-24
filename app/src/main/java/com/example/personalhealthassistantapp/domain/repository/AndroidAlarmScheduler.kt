@@ -17,28 +17,32 @@ class AndroidAlarmScheduler @Inject constructor(@ApplicationContext private val 
     private val alarmManager = context.getSystemService(AlarmManager::class.java)
     override fun schedule(time: AlarmModel) {
 
-        val intent = Intent(context, AlarmReceiver::class.java).apply {
-            putExtra("EXTRA_MESSAGE", time.message)
-        }
-        val pendingIntent = PendingIntent.getBroadcast(
-            context,
-            time.hashCode(),
-            intent,
-            PendingIntent.FLAG_UPDATE_CURRENT or PendingIntent.FLAG_IMMUTABLE
-        )
+            val intent = Intent(context, AlarmReceiver::class.java).apply {
+                putExtra("EXTRA_MESSAGE", time.message)
+                putExtra("EXTRA_TIME", time.time.toString())
+            }
 
+            val pendingIntent = PendingIntent.getBroadcast(
+                context,
+                time.hashCode(),
+                intent,
+                PendingIntent.FLAG_UPDATE_CURRENT or PendingIntent.FLAG_IMMUTABLE
+            )
 
-        alarmManager.setExactAndAllowWhileIdle(
-            AlarmManager.RTC_WAKEUP,
-            time.time.atZone(ZoneId.systemDefault()).toEpochSecond() * 1000,
-            pendingIntent
-        )
+            val triggerTimeMillis = time.time
+                .atZone(ZoneId.systemDefault())
+                .toEpochSecond() * 1000
+
+            alarmManager.setExactAndAllowWhileIdle(
+                AlarmManager.RTC_WAKEUP,
+                triggerTimeMillis,
+                pendingIntent
+            )
     }
 
     override fun cancel(time: AlarmModel) {
-        val intent = Intent(context, AlarmReceiver::class.java).apply {
-            putExtra("EXTRA_MESSAGE", time.message)
-        }
+        val intent = Intent(context, AlarmReceiver::class.java)
+
         val pendingIntent = PendingIntent.getBroadcast(
             context,
             time.hashCode(),

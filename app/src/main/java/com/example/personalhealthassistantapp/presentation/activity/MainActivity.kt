@@ -1,9 +1,15 @@
 package com.example.personalhealthassistantapp.presentation.activity
 
 import android.app.Activity
+import android.app.AlarmManager
+import android.content.Context
+import android.content.Intent
 import android.content.pm.PackageManager
+import android.net.Uri
 import android.os.Build
 import android.os.Bundle
+import android.os.PowerManager
+import android.provider.Settings
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
 import androidx.activity.enableEdgeToEdge
@@ -16,6 +22,7 @@ import androidx.lifecycle.ViewModel
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
+import com.example.personalhealthassistantapp.NotificationSetupScreen
 import com.example.personalhealthassistantapp.presentation.ChatBotScreen
 import com.example.personalhealthassistantapp.presentation.HeightPickerScreen
 import com.example.personalhealthassistantapp.presentation.HomeScreen
@@ -51,6 +58,9 @@ class MainActivity : ComponentActivity() {
                 )
             }
 
+            requestExactAlarmPermission()
+            requestIgnoreBatteryOptimizations()
+
             setContent {
                 val viewModel = hiltViewModel<ChatViewModel>()
                 val dataBaseViewModel = hiltViewModel<DataBaseViewModel>()
@@ -69,6 +79,32 @@ class MainActivity : ComponentActivity() {
         }
     }
 
+    private fun requestExactAlarmPermission() {
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.S) {
+            val alarmManager = getSystemService(Context.ALARM_SERVICE) as AlarmManager
+            if (!alarmManager.canScheduleExactAlarms()) {
+                val intent = Intent(Settings.ACTION_REQUEST_SCHEDULE_EXACT_ALARM).apply {
+                    flags = Intent.FLAG_ACTIVITY_NEW_TASK
+                }
+                startActivity(intent)
+            }
+        }
+    }
+
+    private fun requestIgnoreBatteryOptimizations() {
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
+            val powerManager = getSystemService(Context.POWER_SERVICE) as PowerManager
+            if (!powerManager.isIgnoringBatteryOptimizations(packageName)) {
+                val intent = Intent(Settings.ACTION_REQUEST_IGNORE_BATTERY_OPTIMIZATIONS).apply {
+                    data = Uri.parse("package:$packageName")
+                    flags = Intent.FLAG_ACTIVITY_NEW_TASK
+                }
+                startActivity(intent)
+            }
+        }
+    }
+
+
     @Composable
     fun NavigationGraph(viewModel: ChatViewModel, dataBaseViewModel: DataBaseViewModel) {
         val navController = rememberNavController()
@@ -86,7 +122,7 @@ class MainActivity : ComponentActivity() {
                 WelcomeScreenSecond(navController = navController)
             }
             composable(ScreensName.HomeScreen.name) {
-                HomeScreen(navController = navController)
+                HomeScreen(navController = navController, chatViewModel = viewModel)
             }
             composable(ScreensName.WeightPickerScreen.name) {
                 WeightPickerScreen(navController = navController)
@@ -111,6 +147,9 @@ class MainActivity : ComponentActivity() {
             }
             composable(ScreensName.ResetPasswordScreen.name) {
 
+            }
+            composable(ScreensName.NotificationSetting.name){
+                NotificationSetupScreen()
             }
         }
 
