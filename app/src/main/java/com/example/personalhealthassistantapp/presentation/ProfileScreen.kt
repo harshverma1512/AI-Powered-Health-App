@@ -58,6 +58,7 @@ import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.navigation.NavController
 import com.example.personalhealthassistantapp.R
+import com.example.personalhealthassistantapp.utility.SharedPrefManager
 import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.auth.userProfileChangeRequest
 import com.google.firebase.firestore.ktx.firestore
@@ -205,6 +206,7 @@ fun ProfileScreen(navController: NavController) {
             onClick = {
                 saveUserProfile(fullName,phoneNumber, email, selectedAccountType ,
                     imageUri.toString(),context)
+                navController.navigate(ScreensName.WeightPickerScreen.name)
             },
             modifier = Modifier
                 .fillMaxWidth()
@@ -238,11 +240,11 @@ fun saveUserProfile(
     val userId = user?.uid ?: return
 
     val userData = hashMapOf(
-        "fullName" to fullName,
-        "phone" to phoneNumber,
-        "email" to email,
-        "accountType" to accountType,
-        "photoUrl" to (imageUrl ?: "")
+        SharedPrefManager.NAME to fullName,
+        SharedPrefManager.PHONE to phoneNumber,
+        SharedPrefManager.EMAIL to email,
+        SharedPrefManager.ACCOUNT_TYPE to accountType,
+        SharedPrefManager.PHOTO_URL to (imageUrl ?: "")
     )
 
     // Update Auth display name

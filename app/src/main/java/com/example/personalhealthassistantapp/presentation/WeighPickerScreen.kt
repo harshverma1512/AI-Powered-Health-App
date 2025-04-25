@@ -1,5 +1,7 @@
 package com.example.personalhealthassistantapp.presentation
 
+import android.content.Context
+import android.widget.Toast
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Spacer
@@ -18,10 +20,8 @@ import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
-import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
-import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
@@ -34,7 +34,6 @@ import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.Icon
 import androidx.compose.material3.Text
-import androidx.compose.runtime.derivedStateOf
 import androidx.compose.runtime.snapshotFlow
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.draw.clip
@@ -46,7 +45,11 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.navigation.NavController
 import com.example.personalhealthassistantapp.R
+import com.example.personalhealthassistantapp.utility.SharedPrefManager
+import com.example.personalhealthassistantapp.utility.Utils.saveUserData
 import com.google.firebase.Firebase
+import com.google.firebase.auth.FirebaseAuth
+import com.google.firebase.firestore.firestore
 
 
 @Composable
@@ -186,7 +189,26 @@ fun WeightPickerScreen(
         }
 
         Button(
-            onClick = { navController.navigate(ScreensName.HeightPickerScreen.name) },
+            onClick = {
+
+                val weightData = mapOf(
+                    SharedPrefManager.WEIGHT to selectedWeight,
+                    SharedPrefManager.WEIGHT_MEASUREMENT to selectedUnit
+                )
+
+                saveUserData(weightData, onSuccess = {
+                    Toast.makeText(
+                        navController.context, "Weight updated successfully!", Toast.LENGTH_SHORT
+                    ).show()
+                    navController.navigate(ScreensName.HeightPickerScreen.name)
+                }, onError = {
+                    Toast.makeText(
+                        navController.context,
+                        "Failed to update weight: ${it.message}",
+                        Toast.LENGTH_SHORT
+                    ).show()
+                })
+            },
             modifier = Modifier
                 .fillMaxWidth()
                 .height(50.dp),

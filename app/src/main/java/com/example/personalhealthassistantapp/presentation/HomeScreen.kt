@@ -1,6 +1,5 @@
 package com.example.personalhealthassistantapp.presentation
 
-import android.util.Log
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
@@ -28,6 +27,7 @@ import androidx.navigation.NavController
 import coil.compose.AsyncImage
 import com.example.personalhealthassistantapp.R
 import com.example.personalhealthassistantapp.presentation.viewmodel.ChatViewModel
+import com.example.personalhealthassistantapp.utility.SharedPrefManager
 import com.example.personalhealthassistantapp.utility.Utils.getGreeting
 import com.google.firebase.auth.FirebaseAuth
 import kotlin.random.Random
@@ -36,6 +36,7 @@ import kotlin.random.Random
 fun HomeScreen(navController: NavController,  chatViewModel: ChatViewModel) {
 
     val score = chatViewModel.score
+    val imageUrl = chatViewModel.userData?.get(SharedPrefManager.PHOTO_URL)
 
      Column(
         modifier = Modifier
@@ -47,7 +48,7 @@ fun HomeScreen(navController: NavController,  chatViewModel: ChatViewModel) {
                 .fillMaxSize() ,contentPadding = PaddingValues(16.dp),
             verticalArrangement = Arrangement.spacedBy(16.dp)
         ) {
-            item { TopBarSection(navController) }
+            item { TopBarSection(navController,  imageUrl) }
             item { HealthScoreSection(score, navController) }
             item { VitalsSection(navController) }
             item { FitnessTrackerSection(navController) }
@@ -58,7 +59,7 @@ fun HomeScreen(navController: NavController,  chatViewModel: ChatViewModel) {
 }
 
 @Composable
-fun TopBarSection(navController: NavController) {
+fun TopBarSection(navController: NavController, imageUrl: Any?, ) {
     val user = FirebaseAuth.getInstance().currentUser
     val displayName = user?.displayName ?: "User"
     val photoUrl = user?.photoUrl
@@ -79,7 +80,7 @@ fun TopBarSection(navController: NavController) {
                         .clip(CircleShape)
                         .background(Color.Gray)
                 ) {
-                    photoUrl?.let {
+                    imageUrl?.let {
                         AsyncImage(
                             model = it,
                             contentDescription = "Profile Image",

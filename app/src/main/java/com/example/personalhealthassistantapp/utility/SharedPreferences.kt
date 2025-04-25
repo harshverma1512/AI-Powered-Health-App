@@ -11,10 +11,21 @@ class SharedPrefManager(context: Context) {
     private val sharedPref: SharedPreferences = context.getSharedPreferences(PREFS_NAME, Context.MODE_PRIVATE)
 
     companion object {
+
         //User Keys
         const val KEY_USERNAME = "username"
         const val KEY_IS_LOGGED_IN = "is_logged_in"
         const val USER_FIRST_TIME_OPEN = "user_first_time_open"
+        const val NAME ="fullName"
+        const val PHONE = "phone"
+        const val EMAIL = "email"
+        const val ACCOUNT_TYPE  = "accountType"
+        const val PHOTO_URL = "photoUrl"
+        const val WEIGHT = "weight"
+        const val WEIGHT_MEASUREMENT = "weight_measurement"
+        const val HEIGHT = "height"
+
+
 
         // Alarm keys
         const val KEY_SLEEP_HOUR = "sleep_hour"

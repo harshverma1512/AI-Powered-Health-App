@@ -2,19 +2,18 @@ package com.example.personalhealthassistantapp.presentation.viewmodel
 
 import android.os.Build
 import android.util.Log
-import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateListOf
 import androidx.compose.runtime.mutableStateOf
-import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.example.personalhealthassistantapp.data.model.MessageModel
+import com.example.personalhealthassistantapp.utility.SharedPrefManager
 import com.example.personalhealthassistantapp.utility.Utils
+import com.example.personalhealthassistantapp.utility.Utils.fetchCurrentUserData
 import com.google.ai.client.generativeai.GenerativeModel
 import dagger.hilt.android.lifecycle.HiltViewModel
-import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
 import javax.inject.Inject
 
@@ -22,15 +21,24 @@ import javax.inject.Inject
 class ChatViewModel @Inject constructor() : ViewModel() {
 
     var score by mutableStateOf<Int?>(null)
-        private set
+    var userData by mutableStateOf<Map<String, Any>?>(null)
 
     init {
         // Simulate API call on first launch
-        viewModelScope.launch {
-            val bmi = calculateBMI(70.0, "kg", 170.0)
-          //  sendMsg("based on my on my BMI what's the score of my health? out of 100 my bmi is ${bmi} only tell us in number and nothing else")
-            score = bmi.toInt()
-        }
+        fetchCurrentUserData(onResult = {
+            userData = it
+            Log.d("checkUserData", it.toString())
+            userData?.let {
+                viewModelScope.launch {
+                    val bmi = calculateBMI(userData?.get(SharedPrefManager.WEIGHT) as Long,
+                        userData?.get(SharedPrefManager.WEIGHT_MEASUREMENT) as String,
+                        userData?.get(SharedPrefManager.HEIGHT) as Long)
+                    score = bmi.toInt()
+                }
+            }
+        }, onError = {
+            userData = null
+        })
     }
 
     val messageList = mutableStateListOf<MessageModel>()
@@ -45,12 +53,12 @@ class ChatViewModel @Inject constructor() : ViewModel() {
     }
 
 
-    private fun calculateBMI(weight: Double, weightUnit: String, heightCm: Double): Double {
+    private fun calculateBMI(weight: Long, weightUnit: String, heightCm: Long): Double {
         // Convert weight to kg if it's in lbs
         val weightInKg = if (weightUnit.lowercase() == "lbs") {
-            weight * 0.453592
+            weight.toDouble() * 0.453592
         } else {
-            weight
+            weight.toDouble()
         }
 
         // Convert height from cm to meters
@@ -91,7 +99,7 @@ class ChatViewModel @Inject constructor() : ViewModel() {
                 } else {
                     messageList.removeAt(messageList.size - 1)
                 }
-                messageList.add(MessageModel("Error: Unable to fetch response Support Model Error", false))
+                messageList.add(MessageModel("Error: Unable to fetch response  ${e.message}", false))
             }
         }
     }

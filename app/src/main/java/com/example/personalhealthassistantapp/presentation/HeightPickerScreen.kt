@@ -1,6 +1,7 @@
 package com.example.personalhealthassistantapp.presentation
 
 import android.util.Log
+import android.widget.Toast
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
@@ -44,6 +45,8 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.navigation.NavController
 import com.example.personalhealthassistantapp.R
+import com.example.personalhealthassistantapp.utility.SharedPrefManager
+import com.example.personalhealthassistantapp.utility.Utils.saveUserData
 import kotlinx.coroutines.launch
 
 @Composable
@@ -53,7 +56,6 @@ fun HeightPickerScreen(
     maxHeight: Int = 300,
     initialHeight: Int = 160,
     navController: NavController,
-    onContinue: (Int) -> Unit = {}
 ) {
     val screenHeight = LocalConfiguration.current.screenHeightDp.dp
     val pickerHeight = screenHeight * 0.6f
@@ -154,8 +156,23 @@ fun HeightPickerScreen(
 
         Button(
             onClick = {
-                onContinue(selectedHeight)
-                navController.navigate(ScreensName.HomeScreen.name)
+                val heightData = mapOf(
+                    SharedPrefManager.HEIGHT to selectedHeight
+                )
+                saveUserData(heightData, onSuccess = {
+                    Toast.makeText(
+                        navController.context,
+                        "Height update successfully!",
+                        Toast.LENGTH_SHORT
+                    ).show()
+                    navController.navigate(ScreensName.HomeScreen.name)
+                }, onError = {
+                    Toast.makeText(
+                        navController.context,
+                        "Failed to update weight: ${it.message}",
+                        Toast.LENGTH_SHORT
+                    ).show()
+                })
             },
             modifier = Modifier
                 .fillMaxWidth()
