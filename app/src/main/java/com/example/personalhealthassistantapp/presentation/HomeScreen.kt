@@ -35,25 +35,27 @@ import kotlin.random.Random
 @Composable
 fun HomeScreen(navController: NavController,  chatViewModel: ChatViewModel) {
 
-    val score = chatViewModel.score
-    val imageUrl = chatViewModel.userData?.get(SharedPrefManager.PHOTO_URL)
+    Scaffold {innerPadding ->
+        val score = chatViewModel.score
+        val imageUrl = chatViewModel.userData?.get(SharedPrefManager.PHOTO_URL)
 
-     Column(
-        modifier = Modifier
-            .fillMaxSize()
-            .background(color = colorResource(id = R.color.backgroundColor))
-    ) {
-        LazyColumn(
+        Column(
             modifier = Modifier
-                .fillMaxSize() ,contentPadding = PaddingValues(16.dp),
-            verticalArrangement = Arrangement.spacedBy(16.dp)
+                .fillMaxSize()
+                .background(color = colorResource(id = R.color.backgroundColor))
         ) {
-            item { TopBarSection(navController,  imageUrl) }
-            item { HealthScoreSection(score, navController) }
-            item { VitalsSection(navController) }
-            item { FitnessTrackerSection(navController) }
-            item { WellnessChatbotSection(navController) }
-            item { MedicationSection(navController) }
+            LazyColumn(
+                modifier = Modifier.padding(innerPadding)
+                    .fillMaxSize(), contentPadding = PaddingValues(16.dp),
+                verticalArrangement = Arrangement.spacedBy(16.dp)
+            ) {
+                item { TopBarSection(navController, imageUrl) }
+                item { HealthScoreSection(score, navController) }
+                item { VitalsSection(navController) }
+                item { FitnessTrackerSection(navController) }
+                item { WellnessChatbotSection(navController) }
+                item { MedicationSection(navController) }
+            }
         }
     }
 }
@@ -482,7 +484,11 @@ fun WellnessChatbotSection(navController: NavController) {
 fun MedicationSection(navController: NavController) {
     Card(
         shape = RoundedCornerShape(16.dp),
-        modifier = Modifier.fillMaxWidth(),
+        modifier = Modifier
+            .fillMaxWidth()
+            .clickable {
+                navController.navigate(ScreensName.SymptomsInputScreen.name)
+            },
         colors = CardDefaults.cardColors(containerColor = Color.White)
     ) {
         Column(modifier = Modifier.padding(16.dp)) {

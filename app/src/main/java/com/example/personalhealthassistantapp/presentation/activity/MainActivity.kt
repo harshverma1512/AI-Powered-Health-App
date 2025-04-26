@@ -24,6 +24,7 @@ import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
 import com.example.personalhealthassistantapp.NotificationSetupScreen
 import com.example.personalhealthassistantapp.presentation.ChatBotScreen
+import com.example.personalhealthassistantapp.presentation.HealthTextAnalysisScreen
 import com.example.personalhealthassistantapp.presentation.HeightPickerScreen
 import com.example.personalhealthassistantapp.presentation.HomeScreen
 import com.example.personalhealthassistantapp.presentation.LoginSignupScreen
@@ -31,6 +32,7 @@ import com.example.personalhealthassistantapp.presentation.ProfileScreen
 import com.example.personalhealthassistantapp.presentation.ScreensName
 import com.example.personalhealthassistantapp.presentation.SleepTrackingScreen
 import com.example.personalhealthassistantapp.presentation.SplashScreen
+import com.example.personalhealthassistantapp.presentation.SymptomsInputScreen
 import com.example.personalhealthassistantapp.presentation.WeightPickerScreen
 import com.example.personalhealthassistantapp.presentation.ui.PersonalHealthAssistantAppTheme
 import com.example.personalhealthassistantapp.presentation.viewmodel.ChatViewModel
@@ -41,45 +43,60 @@ import dagger.hilt.android.AndroidEntryPoint
 
 @AndroidEntryPoint
 class MainActivity : ComponentActivity() {
+
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
 
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
-            if (ContextCompat.checkSelfPermission(
-                    this,
-                    android.Manifest.permission.POST_NOTIFICATIONS
-                )
-                != PackageManager.PERMISSION_GRANTED
-            ) {
-                ActivityCompat.requestPermissions(
-                    this as Activity,
-                    arrayOf(android.Manifest.permission.POST_NOTIFICATIONS),
-                    1
-                )
-            }
+        requestRuntimePermissions()
 
-            requestExactAlarmPermission()
-            requestIgnoreBatteryOptimizations()
+        enableEdgeToEdge()
 
-            setContent {
-                val viewModel = hiltViewModel<ChatViewModel>()
-                val dataBaseViewModel = hiltViewModel<DataBaseViewModel>()
-                PersonalHealthAssistantAppTheme {
+        setContent {
+            val viewModel = hiltViewModel<ChatViewModel>()
+            val dataBaseViewModel = hiltViewModel<DataBaseViewModel>()
+            PersonalHealthAssistantAppTheme {
 
-                    val startDestination = remember {
-                        if (intent?.getStringExtra("navigate_to") == "snooze") {
-                            ScreensName.SnoozeScreen.name
-                        } else {
-                            ScreensName.HomeScreen.name
-                        }
+                val startDestination = remember {
+                    if (intent?.getStringExtra("navigate_to") == "snooze") {
+                        ScreensName.SnoozeScreen.name
+                    } else {
+                        ScreensName.HomeScreen.name
                     }
-                    NavigationGraph(viewModel, dataBaseViewModel)
                 }
+                NavigationGraph(viewModel, dataBaseViewModel)
             }
         }
     }
 
-    private fun requestExactAlarmPermission() {
+    private fun requestRuntimePermissions() {
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) { // Android 13 (API 33)
+            if (ContextCompat.checkSelfPermission(
+                    this,
+                    android.Manifest.permission.POST_NOTIFICATIONS
+                ) != PackageManager.PERMISSION_GRANTED
+            ) {
+                ActivityCompat.requestPermissions(
+                    this,
+                    arrayOf(android.Manifest.permission.POST_NOTIFICATIONS),
+                    1
+                )
+            }
+        }
+
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.UPSIDE_DOWN_CAKE) { // Android 14+ (API 34+)
+            if (ContextCompat.checkSelfPermission(
+                    this,
+                    android.Manifest.permission.FOREGROUND_SERVICE_MEDIA_PLAYBACK
+                ) != PackageManager.PERMISSION_GRANTED
+            ) {
+                ActivityCompat.requestPermissions(
+                    this,
+                    arrayOf(android.Manifest.permission.FOREGROUND_SERVICE_MEDIA_PLAYBACK),
+                    2
+                )
+            }
+        }
+
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.S) {
             val alarmManager = getSystemService(Context.ALARM_SERVICE) as AlarmManager
             if (!alarmManager.canScheduleExactAlarms()) {
@@ -89,9 +106,7 @@ class MainActivity : ComponentActivity() {
                 startActivity(intent)
             }
         }
-    }
 
-    private fun requestIgnoreBatteryOptimizations() {
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
             val powerManager = getSystemService(Context.POWER_SERVICE) as PowerManager
             if (!powerManager.isIgnoringBatteryOptimizations(packageName)) {
@@ -103,7 +118,6 @@ class MainActivity : ComponentActivity() {
             }
         }
     }
-
 
     @Composable
     fun NavigationGraph(viewModel: ChatViewModel, dataBaseViewModel: DataBaseViewModel) {
@@ -150,6 +164,12 @@ class MainActivity : ComponentActivity() {
             }
             composable(ScreensName.NotificationSetting.name){
                 NotificationSetupScreen()
+            }
+            composable(ScreensName.HealthTextAnalysisScreen.name){
+                HealthTextAnalysisScreen(navController , chatViewModel = viewModel)
+            }
+            composable(ScreensName.SymptomsInputScreen.name) {
+                SymptomsInputScreen(navController, viewModel)
             }
         }
 

@@ -23,8 +23,10 @@ class ChatViewModel @Inject constructor() : ViewModel() {
     var score by mutableStateOf<Int?>(null)
     var userData by mutableStateOf<Map<String, Any>?>(null)
 
+    private val _selectedSymptoms = mutableStateListOf<String>()
+    var symptomsDiseaseResponse = ""
+
     init {
-        // Simulate API call on first launch
         fetchCurrentUserData(onResult = {
             userData = it
             Log.d("checkUserData", it.toString())
@@ -52,20 +54,39 @@ class ChatViewModel @Inject constructor() : ViewModel() {
         return "%.${decimals}f".format(this).toDouble()
     }
 
+    fun setSymptoms(symptoms: List<String>) {
+        _selectedSymptoms.clear()
+        _selectedSymptoms.addAll(symptoms)
+        findDiseaseBasedOnSymptoms(symptoms)
+    }
 
     private fun calculateBMI(weight: Long, weightUnit: String, heightCm: Long): Double {
-        // Convert weight to kg if it's in lbs
         val weightInKg = if (weightUnit.lowercase() == "lbs") {
             weight.toDouble() * 0.453592
         } else {
             weight.toDouble()
         }
-
-        // Convert height from cm to meters
         val heightInMeters = heightCm / 100
 
-        // BMI formula: weight (kg) / height² (m²)
         return (weightInKg / (heightInMeters * heightInMeters)).roundTo(2)
+    }
+
+
+
+    private fun findDiseaseBasedOnSymptoms(symptoms: List<String>) {
+        viewModelScope.launch {
+            try {
+                val model = generativeModel
+                val chat = model.startChat()
+                val response = chat.sendMessage("I will provide you with a list of symptoms. Based on those, please suggest what possible sickness or condition I might have. Also, briefly explain why you think it's that sickness. Please keep your response under 250 words. Here are the symptoms: $symptoms")
+                Log.d("check disease", response.text.toString())
+                response.text?.let {
+                    symptomsDiseaseResponse = it
+                }
+            }catch (e : Exception){
+                symptomsDiseaseResponse = "Enable to fetch response"
+            }
+        }
     }
 
     fun sendMsg(question: String) {

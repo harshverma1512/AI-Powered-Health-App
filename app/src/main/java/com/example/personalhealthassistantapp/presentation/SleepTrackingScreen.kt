@@ -49,9 +49,7 @@ import java.time.format.DateTimeFormatter
 import java.time.format.TextStyle
 import java.util.*
 
-
 @OptIn(ExperimentalMaterial3Api::class)
-@RequiresApi(Build.VERSION_CODES.O)
 @Composable
 fun SleepTrackingScreen(navigation: NavController, dataBaseViewModel: DataBaseViewModel) {
     val sheetState = rememberModalBottomSheetState(skipPartiallyExpanded = true)
@@ -59,52 +57,54 @@ fun SleepTrackingScreen(navigation: NavController, dataBaseViewModel: DataBaseVi
     var currentDate by remember { mutableStateOf(LocalDate.now()) }
     val context = rememberCoroutineScope()
 
-    if (showSheet) {
-        ModalBottomSheet(
-            onDismissRequest = { showSheet = false }, sheetState = sheetState
-        ) {
-            FilterSleepSheetContent(
-                onDismiss = { sleepModel ->
-                    context.launch {
-                        dataBaseViewModel.insertSleepHistory(
-                            sleepModel
-                        )
-                    }
-                    showSheet = false
-                },
-            )
-        }
-    }
-
-    Box(modifier = Modifier.fillMaxSize()) {
-        Column(
-            modifier = Modifier
-                .fillMaxSize()
-                .verticalScroll(rememberScrollState())
-                .background(Color(0xFFF7F9FC))
-                .padding(16.dp)
-        ) {
-            Utils.BackBtn { navigation.popBackStack() }
-            NativeCalendar {
-                currentDate = it
+    Scaffold { innerPadding ->
+        if (showSheet) {
+            ModalBottomSheet(
+                onDismissRequest = { showSheet = false }, sheetState = sheetState
+            ) {
+                FilterSleepSheetContent(
+                    onDismiss = { sleepModel ->
+                        context.launch {
+                            dataBaseViewModel.insertSleepHistory(
+                                sleepModel
+                            )
+                        }
+                        showSheet = false
+                    },
+                )
             }
-            Spacer(modifier = Modifier.height(16.dp))
-            SleepOverviewCard()
-            Spacer(modifier = Modifier.height(16.dp))
-            SleepHistorySection(dataBaseViewModel)
-            Spacer(modifier = Modifier.height(80.dp)) // for FAB spacing
         }
 
-        FloatingActionButton(
-            onClick = { showSheet = true },
-            containerColor = Color(0xFF3B82F6),
-            shape = RoundedCornerShape(12.dp),
-            modifier = Modifier
-                .align(Alignment.BottomCenter)
-                .padding(bottom = 16.dp)
-                .size(56.dp)
-        ) {
-            Icon(Icons.Default.Add, contentDescription = "Add", tint = Color.White)
+        Box(modifier = Modifier.fillMaxSize().padding(innerPadding)) {
+            Column(
+                modifier = Modifier
+                    .fillMaxSize()
+                    .verticalScroll(rememberScrollState())
+                    .background(Color(0xFFF7F9FC))
+                    .padding(16.dp)
+            ) {
+                Utils.BackBtn { navigation.popBackStack() }
+                NativeCalendar {
+                    currentDate = it
+                }
+                Spacer(modifier = Modifier.height(16.dp))
+                SleepOverviewCard()
+                Spacer(modifier = Modifier.height(16.dp))
+                SleepHistorySection(dataBaseViewModel)
+                Spacer(modifier = Modifier.height(80.dp)) // for FAB spacing
+            }
+
+            FloatingActionButton(
+                onClick = { showSheet = true },
+                containerColor = Color(0xFF3B82F6),
+                shape = RoundedCornerShape(12.dp),
+                modifier = Modifier
+                    .align(Alignment.BottomCenter)
+                    .padding(bottom = 16.dp)
+                    .size(56.dp)
+            ) {
+                Icon(Icons.Default.Add, contentDescription = "Add", tint = Color.White)
+            }
         }
     }
 }
@@ -147,7 +147,8 @@ fun SleepHistoryCard(sleepHistoryModel: SleepHistoryModel) {
                     fontWeight = FontWeight.SemiBold,
                     color = Color.Gray
                 )
-                Text("Sleeping Hours ${sleepHistoryModel.sleepDuration}", fontWeight = FontWeight.Bold)
+                Text("Sleeping Hours ${sleepHistoryModel.sleepDuration}  $sleepHistoryModel.", fontWeight = FontWeight.Bold)
+                Text("Sleeping Hours ${sleepHistoryModel.sleepDuration}  $sleepHistoryModel.", fontWeight = FontWeight.Bold)
             }
             sleepHistoryModel.sleepType?.let {
                 Text(
