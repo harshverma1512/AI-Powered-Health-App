@@ -2,6 +2,7 @@ package com.example.personalhealthassistantapp.presentation
 
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
+import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
@@ -45,7 +46,8 @@ fun HomeScreen(navController: NavController,  chatViewModel: ChatViewModel) {
                 .background(color = colorResource(id = R.color.backgroundColor))
         ) {
             LazyColumn(
-                modifier = Modifier.padding(innerPadding)
+                modifier = Modifier
+                    .padding(innerPadding)
                     .fillMaxSize(), contentPadding = PaddingValues(16.dp),
                 verticalArrangement = Arrangement.spacedBy(16.dp)
             ) {
@@ -54,7 +56,8 @@ fun HomeScreen(navController: NavController,  chatViewModel: ChatViewModel) {
                 item { VitalsSection(navController) }
                 item { FitnessTrackerSection(navController) }
                 item { WellnessChatbotSection(navController) }
-                item { MedicationSection(navController) }
+                item { AllergySymptomsSection(navController) }
+             //   item { MedicationSection(navController) }
             }
         }
     }
@@ -477,6 +480,34 @@ fun WellnessChatbotSection(navController: NavController) {
                 contentScale = ContentScale.FillWidth,
                 modifier = Modifier.fillMaxSize()
             )
+    }
+}
+
+@Composable
+fun AllergySymptomsSection(navController: NavController) {
+    Card(
+        shape = RoundedCornerShape(16.dp),
+        modifier = Modifier
+            .clickable { navController.navigate(ScreensName.SymptomsInputScreen.name) }
+            .wrapContentWidth()
+            .wrapContentHeight(), // Optional: control height
+        elevation = CardDefaults.cardElevation(defaultElevation = 4.dp),
+    ) {
+        Box(modifier = Modifier
+            .wrapContentWidth()
+            .height(170.dp)){
+            Image(
+                painter = painterResource(id = R.drawable.allergyimage),
+                contentDescription = null,
+                contentScale = ContentScale.FillWidth,
+                modifier = Modifier
+                    .fillMaxSize(),
+            )
+            Image(painter = painterResource(id = R.drawable.health_plus), contentDescription = "Health Plus Logo", modifier = Modifier
+                .align(Alignment.BottomEnd)
+                .size(70.dp)
+                .padding(bottom = 20.dp, end = 20.dp))
+        }
     }
 }
 

@@ -17,6 +17,7 @@ import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
@@ -29,50 +30,53 @@ import com.example.personalhealthassistantapp.presentation.viewmodel.ChatViewMod
 
 @Composable
 fun HealthTextAnalysisScreen(navController: NavController, chatViewModel: ChatViewModel) {
-    Column(
-        modifier = Modifier
-            .fillMaxSize()
-            .verticalScroll(rememberScrollState())
-            .padding(16.dp),
-        verticalArrangement = Arrangement.SpaceBetween
-    ) {
-        Column {
-            Text(
-                text = "Textual AI Health\nAnalysis",
-                style = MaterialTheme.typography.headlineSmall,
-                fontWeight = FontWeight.Bold
-            )
 
-            Spacer(modifier = Modifier.height(8.dp))
-
-            Text(
-                text = "Write any ongoing health conditions you have right now. Our AI will analyze it.",
-                style = MaterialTheme.typography.bodyMedium
-            )
-
-            Spacer(modifier = Modifier.height(24.dp))
-
-            Text(text = chatViewModel.symptomsDiseaseResponse)
-
-            Spacer(modifier = Modifier.height(16.dp))
-        }
-
-        Button(
-            onClick = {
-                navController.navigate(ScreensName.HomeScreen.name) {
-                    popUpTo(0)
-                    launchSingleTop = true
-                }
-            },
-            modifier = Modifier
-                .fillMaxWidth()
-                .height(56.dp),
-            shape = RoundedCornerShape(12.dp),
-            colors = ButtonDefaults.buttonColors(containerColor = colorResource(R.color.btn_color))
+    Scaffold { innerPadding ->
+        Column(
+            modifier = Modifier.padding(innerPadding)
+                .fillMaxSize()
+                .verticalScroll(rememberScrollState())
+                .padding(16.dp),
+            verticalArrangement = Arrangement.SpaceBetween
         ) {
-            Text("Home")
-            Spacer(modifier = Modifier.width(8.dp))
-            Icon(Icons.Default.ArrowForward, contentDescription = null)
+            Column {
+                Text(
+                    text = "Textual AI Health\nAnalysis",
+                    style = MaterialTheme.typography.headlineSmall,
+                    fontWeight = FontWeight.Bold
+                )
+
+                Spacer(modifier = Modifier.height(8.dp))
+
+                Text(
+                    text = "Write any ongoing health conditions you have right now. Our AI will analyze it.",
+                    style = MaterialTheme.typography.bodyMedium
+                )
+
+                Spacer(modifier = Modifier.height(24.dp))
+
+                Text(text = chatViewModel.symptomsDiseaseResponse)
+
+                Spacer(modifier = Modifier.height(16.dp))
+            }
+
+            Button(
+                onClick = {
+                    navController.navigate(ScreensName.HomeScreen.name) {
+                        popUpTo(0)
+                        launchSingleTop = true
+                    }
+                },
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .height(56.dp),
+                shape = RoundedCornerShape(12.dp),
+                colors = ButtonDefaults.buttonColors(containerColor = colorResource(R.color.btn_color))
+            ) {
+                Text("Home")
+                Spacer(modifier = Modifier.width(8.dp))
+                Icon(Icons.Default.ArrowForward, contentDescription = null)
+            }
         }
     }
 }

@@ -27,8 +27,6 @@ import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.ArrowDropDown
-import androidx.compose.material.icons.filled.ArrowForward
 import androidx.compose.material.icons.filled.Edit
 import androidx.compose.material.icons.filled.Email
 import androidx.compose.material.icons.filled.Person
@@ -53,6 +51,7 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.colorResource
 import androidx.compose.ui.res.painterResource
+import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
@@ -60,12 +59,14 @@ import androidx.navigation.NavController
 import com.example.personalhealthassistantapp.R
 import com.example.personalhealthassistantapp.utility.SharedPrefManager
 import com.google.firebase.auth.FirebaseAuth
+import com.google.firebase.auth.ktx.auth
 import com.google.firebase.auth.userProfileChangeRequest
 import com.google.firebase.firestore.ktx.firestore
 import com.google.firebase.ktx.Firebase
 
 @Composable
-fun ProfileScreen(navController: NavController) {
+@Preview(showBackground = true)
+fun ProfileScreen(navController: NavController = NavController(LocalContext.current)) {
     val context = LocalContext.current
     val db = Firebase.firestore
     val user = FirebaseAuth.getInstance().currentUser
@@ -183,7 +184,9 @@ fun ProfileScreen(navController: NavController) {
         Text("Account Type", style = MaterialTheme.typography.labelMedium)
 
         Row(
-            modifier = Modifier.fillMaxWidth().padding(top = 10.dp),
+            modifier = Modifier
+                .fillMaxWidth()
+                .padding(top = 10.dp),
             horizontalArrangement = Arrangement.SpaceEvenly
         ) {
             listOf("Regular", "Patient", "Physician").forEach { type ->
@@ -204,8 +207,10 @@ fun ProfileScreen(navController: NavController) {
 
         Button(
             onClick = {
-                saveUserProfile(fullName,phoneNumber, email, selectedAccountType ,
-                    imageUri.toString(),context)
+                saveUserProfile(
+                    fullName, phoneNumber, email, selectedAccountType,
+                    imageUri.toString(), context
+                )
                 navController.navigate(ScreensName.WeightPickerScreen.name)
             },
             modifier = Modifier
@@ -223,6 +228,20 @@ fun ProfileScreen(navController: NavController) {
         }
 
         Spacer(modifier = Modifier.height(16.dp))
+
+        Text(
+            text = "Logout",
+            color = Color.Red,
+            modifier = Modifier.align(Alignment.CenterHorizontally).clickable {
+                Firebase.auth.signOut()
+                SharedPrefManager(context).clearUserDetails()
+                navController.navigate(ScreensName.LoginScreen.name){
+                    popUpTo(0)
+                    launchSingleTop = true
+                }
+            },
+            fontWeight = FontWeight.Bold
+        )
     }
 }
 

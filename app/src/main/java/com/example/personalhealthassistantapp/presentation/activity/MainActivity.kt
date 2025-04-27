@@ -27,6 +27,7 @@ import com.example.personalhealthassistantapp.presentation.ChatBotScreen
 import com.example.personalhealthassistantapp.presentation.HealthTextAnalysisScreen
 import com.example.personalhealthassistantapp.presentation.HeightPickerScreen
 import com.example.personalhealthassistantapp.presentation.HomeScreen
+import com.example.personalhealthassistantapp.presentation.HydrationRecord
 import com.example.personalhealthassistantapp.presentation.LoginSignupScreen
 import com.example.personalhealthassistantapp.presentation.ProfileScreen
 import com.example.personalhealthassistantapp.presentation.ScreensName
@@ -170,6 +171,9 @@ class MainActivity : ComponentActivity() {
             }
             composable(ScreensName.SymptomsInputScreen.name) {
                 SymptomsInputScreen(navController, viewModel)
+            }
+            composable(ScreensName.HydrationScreen.name){
+                HydrationRecord(navController = navController)
             }
         }
 

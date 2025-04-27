@@ -38,146 +38,148 @@ import com.google.accompanist.flowlayout.FlowRow
 fun SymptomsInputScreen(navController: NavController , chatViewModel : ChatViewModel) {
     val symptoms = remember { mutableStateListOf<String>() }
 
-    Column(
-        modifier = Modifier
-            .fillMaxSize()
-            .verticalScroll(rememberScrollState())
-            .padding(16.dp),
-    ) {
-        Utils.BackBtn {
-            navController.popBackStack()
-        }
-        Column {
+    Scaffold {innerPadding ->
+        Column(
+            modifier = Modifier.padding(innerPadding)
+                .fillMaxSize()
+                .verticalScroll(rememberScrollState())
+                .padding(16.dp),
+        ) {
+            Utils.BackBtn {
+                navController.popBackStack()
+            }
+            Column {
 
-            Spacer(modifier = Modifier.height(50.dp))
-            Text(
-                text = "Do you have any\nsymptoms/allergy?",
-                style = MaterialTheme.typography.headlineSmall,
-                fontWeight = FontWeight.Bold
-            )
+                Spacer(modifier = Modifier.height(50.dp))
+                Text(
+                    text = "Do you have any\nsymptoms/allergy?",
+                    style = MaterialTheme.typography.headlineSmall,
+                    fontWeight = FontWeight.Bold
+                )
 
-            Spacer(modifier = Modifier.height(24.dp))
-            Image(
-                painter = painterResource(id = R.drawable.allergyimage),
-                contentDescription = null,
+                Spacer(modifier = Modifier.height(24.dp))
+                Image(
+                    painter = painterResource(id = R.drawable.allergyimage),
+                    contentDescription = null,
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .height(180.dp),
+                    contentScale = ContentScale.Fit
+                )
+
+                Spacer(modifier = Modifier.height(24.dp))
+
+                // Chip input box
+                SymptomsInputBox(symptoms)
+            }
+
+            Button(
+                onClick = {
+                    navController.navigate(ScreensName.HealthTextAnalysisScreen.name).apply {
+                        chatViewModel.setSymptoms(symptoms)
+                    }
+                },
                 modifier = Modifier
                     .fillMaxWidth()
-                    .height(180.dp),
-                contentScale = ContentScale.Fit
-            )
-
-            Spacer(modifier = Modifier.height(24.dp))
-
-            // Chip input box
-            SymptomsInputBox(symptoms)
+                    .padding(top = 100.dp)
+                    .height(56.dp),
+                colors = ButtonDefaults.buttonColors(containerColor = colorResource(R.color.btn_color)),
+                shape = RoundedCornerShape(12.dp)
+            ) {
+                Text("Continue")
+                Spacer(modifier = Modifier.width(8.dp))
+                Icon(Icons.Default.ArrowForward, contentDescription = null)
+            }
         }
+    }
+}
 
-        Button(
-            onClick = {
-                navController.navigate(ScreensName.HealthTextAnalysisScreen.name).apply {
-                    chatViewModel.setSymptoms(symptoms)
-                }
-            },
+    @Composable
+    fun SymptomsInputBox(symptoms: SnapshotStateList<String>) {
+        var currentSymptom by remember { mutableStateOf("") }
+        val maxSymptoms = 10
+
+        Card(
+            border = BorderStroke(2.dp, Color(0xFF3E80FF)),
+            shape = RoundedCornerShape(16.dp),
             modifier = Modifier
                 .fillMaxWidth()
-                .padding(top = 100.dp)
-                .height(56.dp),
-            colors = ButtonDefaults.buttonColors(containerColor = colorResource(R.color.btn_color)),
-            shape = RoundedCornerShape(12.dp)
+                .padding(16.dp),
+            colors = CardDefaults.cardColors(
+                containerColor = Color(0xFFF7FAFF)
+            )
         ) {
-            Text("Continue")
-            Spacer(modifier = Modifier.width(8.dp))
-            Icon(Icons.Default.ArrowForward, contentDescription = null)
-        }
-    }
-}
+            Column(modifier = Modifier.padding(12.dp)) {
+                FlowRow(
+                    mainAxisSpacing = 8.dp, crossAxisSpacing = 8.dp
+                ) {
+                    symptoms.forEach { symptom ->
+                        AssistChip(
+                            onClick = { symptoms.remove(symptom) }, // Remove on click
+                            label = {
+                                Text(
+                                    text = symptom,
+                                    color = Color(0xFF3E80FF),
+                                    fontWeight = FontWeight.Medium,
+                                    maxLines = 1,
+                                    overflow = TextOverflow.Ellipsis // optional if text too long
+                                )
+                            },
+                            colors = AssistChipDefaults.assistChipColors(
+                                containerColor = Color(0xFFDDEBFF)
+                            ),
+                            modifier = Modifier
+                                .defaultMinSize(minHeight = 32.dp)
+                                .padding(horizontal = 2.dp) // add padding between chips
+                        )
+                    }
 
-@Composable
-fun SymptomsInputBox(symptoms: SnapshotStateList<String>) {
-    var currentSymptom by remember { mutableStateOf("") }
-    val maxSymptoms = 10
-
-    Card(
-        border = BorderStroke(2.dp, Color(0xFF3E80FF)),
-        shape = RoundedCornerShape(16.dp),
-        modifier = Modifier
-            .fillMaxWidth()
-            .padding(16.dp),
-        colors = CardDefaults.cardColors(
-            containerColor = Color(0xFFF7FAFF)
-        )
-    ) {
-        Column(modifier = Modifier.padding(12.dp)) {
-            FlowRow(
-                mainAxisSpacing = 8.dp, crossAxisSpacing = 8.dp
-            ) {
-                symptoms.forEach { symptom ->
-                    AssistChip(
-                        onClick = { symptoms.remove(symptom) }, // Remove on click
-                        label = {
-                            Text(
-                                text = symptom,
-                                color = Color(0xFF3E80FF),
-                                fontWeight = FontWeight.Medium,
-                                maxLines = 1,
-                                overflow = TextOverflow.Ellipsis // optional if text too long
-                            )
-                        },
-                        colors = AssistChipDefaults.assistChipColors(
-                            containerColor = Color(0xFFDDEBFF)
-                        ),
-                        modifier = Modifier
-                            .defaultMinSize(minHeight = 32.dp)
-                            .padding(horizontal = 2.dp) // add padding between chips
-                    )
-                }
-
-                if (symptoms.size < maxSymptoms) {
-                    OutlinedTextField(
-                        value = currentSymptom,
-                        onValueChange = { newText ->
-                            if (newText.endsWith(" ") || newText.endsWith("\n")) {
-                                if (currentSymptom.isNotBlank()) {
-                                    symptoms.add(currentSymptom.trim())
+                    if (symptoms.size < maxSymptoms) {
+                        OutlinedTextField(
+                            value = currentSymptom,
+                            onValueChange = { newText ->
+                                if (newText.endsWith(" ") || newText.endsWith("\n")) {
+                                    if (currentSymptom.isNotBlank()) {
+                                        symptoms.add(currentSymptom.trim())
+                                    }
+                                    currentSymptom = ""
+                                } else {
+                                    currentSymptom = newText
                                 }
-                                currentSymptom = ""
-                            } else {
-                                currentSymptom = newText
-                            }
-                        },
-                        placeholder = { Text("Type symptom") },
-                        modifier = Modifier
-                            .widthIn(min = 80.dp, max = 200.dp)
-                            .padding(4.dp)
-                            .defaultMinSize(minHeight = 40.dp),
-                        singleLine = true,
-                        colors = OutlinedTextFieldDefaults.colors(
-                            unfocusedBorderColor = Color.Transparent,
-                            focusedBorderColor = Color.Transparent
-                        ),
-                        textStyle = LocalTextStyle.current.copy(color = Color.Black)
+                            },
+                            placeholder = { Text("Type symptom") },
+                            modifier = Modifier
+                                .widthIn(min = 80.dp, max = 200.dp)
+                                .padding(4.dp)
+                                .defaultMinSize(minHeight = 40.dp),
+                            singleLine = true,
+                            colors = OutlinedTextFieldDefaults.colors(
+                                unfocusedBorderColor = Color.Transparent,
+                                focusedBorderColor = Color.Transparent
+                            ),
+                            textStyle = LocalTextStyle.current.copy(color = Color.Black)
+                        )
+                    }
+                }
+
+                Spacer(modifier = Modifier.height(8.dp))
+
+                Row(
+                    modifier = Modifier.fillMaxWidth(),
+                    horizontalArrangement = Arrangement.End,
+                    verticalAlignment = Alignment.CenterVertically
+                ) {
+                    Icon(
+                        imageVector = Icons.Default.List,
+                        contentDescription = null,
+                        tint = Color.Gray,
+                        modifier = Modifier.size(16.dp)
+                    )
+                    Spacer(modifier = Modifier.width(4.dp))
+                    Text(
+                        text = "${symptoms.size}/$maxSymptoms", color = Color.Gray, fontSize = 12.sp
                     )
                 }
             }
-
-            Spacer(modifier = Modifier.height(8.dp))
-
-            Row(
-                modifier = Modifier.fillMaxWidth(),
-                horizontalArrangement = Arrangement.End,
-                verticalAlignment = Alignment.CenterVertically
-            ) {
-                Icon(
-                    imageVector = Icons.Default.List,
-                    contentDescription = null,
-                    tint = Color.Gray,
-                    modifier = Modifier.size(16.dp)
-                )
-                Spacer(modifier = Modifier.width(4.dp))
-                Text(
-                    text = "${symptoms.size}/$maxSymptoms", color = Color.Gray, fontSize = 12.sp
-                )
-            }
         }
     }
-}

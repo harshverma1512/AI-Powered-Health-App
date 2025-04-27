@@ -75,7 +75,9 @@ fun SleepTrackingScreen(navigation: NavController, dataBaseViewModel: DataBaseVi
             }
         }
 
-        Box(modifier = Modifier.fillMaxSize().padding(innerPadding)) {
+        Box(modifier = Modifier
+            .fillMaxSize()
+            .padding(innerPadding)) {
             Column(
                 modifier = Modifier
                     .fillMaxSize()
@@ -129,6 +131,7 @@ fun SleepHistorySection(dataBaseViewModel: DataBaseViewModel) {
 
 @Composable
 fun SleepHistoryCard(sleepHistoryModel: SleepHistoryModel) {
+    Spacer(modifier = Modifier.height(10.dp))
     Card(
         shape = RoundedCornerShape(12.dp),
         modifier = Modifier.fillMaxWidth(),

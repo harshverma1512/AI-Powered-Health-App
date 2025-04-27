@@ -67,7 +67,7 @@ object Utils {
 
     @Composable
     fun BackBtn(
-        onBackClick: () -> Unit = {},
+        onBackClick: () -> Unit,
     ) {
         Image(
             painter = painterResource(id = R.drawable.button_icon),
