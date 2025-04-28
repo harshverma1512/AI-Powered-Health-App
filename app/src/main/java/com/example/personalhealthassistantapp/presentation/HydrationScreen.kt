@@ -1,13 +1,14 @@
 package com.example.personalhealthassistantapp.presentation
 
+import androidx.compose.foundation.Canvas
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
-import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
@@ -16,23 +17,28 @@ import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.verticalScroll
-import androidx.compose.material3.ExperimentalMaterial3Api
-import androidx.compose.material3.FloatingActionButton
-import androidx.compose.material3.ModalBottomSheet
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.Edit
+import androidx.compose.material3.AlertDialog
+import androidx.compose.material3.Button
+import androidx.compose.material3.ButtonDefaults
+import androidx.compose.material3.Icon
+import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
-import androidx.compose.material3.rememberModalBottomSheetState
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
-import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.StrokeCap
+import androidx.compose.ui.graphics.drawscope.Stroke
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.LocalConfiguration
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.colorResource
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.font.FontWeight
@@ -40,28 +46,13 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.navigation.NavController
 import com.example.personalhealthassistantapp.R
+import com.example.personalhealthassistantapp.utility.SharedPrefManager
 import com.example.personalhealthassistantapp.utility.Utils
-import kotlinx.coroutines.launch
 
-@OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun HydrationRecord(modifier: Modifier = Modifier, navController: NavController) {
 
-    val waterInTakeMl = 1000
-    var showSheet by remember { mutableStateOf(false) }
-    val sheetState = rememberModalBottomSheetState(skipPartiallyExpanded = true)
-    val context = rememberCoroutineScope()
-
     Scaffold { innerPadding ->
-
-        if (showSheet) {
-            ModalBottomSheet(
-                onDismissRequest = { showSheet = false }, sheetState = sheetState
-            ) {
-                    HydrationBottomSheet()
-            }
-        }
-
         Column(
             modifier
                 .padding(innerPadding)
@@ -71,18 +62,22 @@ fun HydrationRecord(modifier: Modifier = Modifier, navController: NavController)
                 .padding(14.dp)
         ) {
             Row(
-                verticalAlignment = Alignment.CenterVertically, modifier = Modifier.fillMaxWidth()
+                verticalAlignment = Alignment.CenterVertically, modifier = Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.SpaceBetween
             ) {
                 Utils.BackBtn {
                     navController.popBackStack()
                 }
-                Spacer(modifier = Modifier.width(30.dp))
+
                 Text(
                     text = "Hydration",
                     color = Color.Black,
                     fontWeight = FontWeight.Bold,
                     fontSize = 18.sp
                 )
+
+                Icon(imageVector = Icons.Default.Edit, contentDescription = "", modifier.clickable {
+                    navController.navigate(ScreensName.HydrationGoalScreen.name)
+                })
             }
 
             Spacer(modifier = Modifier.height(20.dp))
@@ -98,95 +93,151 @@ fun HydrationRecord(modifier: Modifier = Modifier, navController: NavController)
 
             Spacer(modifier = Modifier.height(10.dp))
 
-            Row(
-                modifier = Modifier.fillMaxWidth(),
-                horizontalArrangement = Arrangement.Center,
-                verticalAlignment = Alignment.CenterVertically
-            ) {
-                Image(
-                    painter = painterResource(id = R.drawable.water_bottle),
-                    contentDescription = "WaterBottle",
-                    modifier = Modifier.size(50.dp)
-                )
+            HalfCircularWaterTracker(
+                currentIntake = SharedPrefManager(context = navController.context).getWaterTake(),
+                goal = SharedPrefManager(navController.context).getWaterGoal()
+            )
 
-                Text(text = "$waterInTakeMl ml", fontWeight = FontWeight.Bold, fontSize = 24.sp)
-            }
+        }
+    }
+}
+@Composable
+fun HalfCircularWaterTracker(
+    currentIntake: Int = 0,
+    goal: Int,
+    modifier: Modifier = Modifier
+) {
+    var currentIntake by remember { mutableStateOf(currentIntake) }
+    var showDialog by remember { mutableStateOf(false) }
+    val context = LocalContext.current
+    val unit = SharedPrefManager(context).getWaterUnit() ?: "mL" // 🆕 Get unit
+    val progress = currentIntake.toFloat() / goal.toFloat()
+
+    Box(
+        contentAlignment = Alignment.Center,
+        modifier = modifier
+            .padding(25.dp)
+            .fillMaxWidth()
+            .height(280.dp)
+    ) {
+        // Half Circular Progress Arc
+        Canvas(modifier = Modifier.fillMaxSize()) {
+            val strokeWidth = 20.dp.toPx()
+            val startAngle = 180f
+            val sweepAngle = 180f
+
+            drawArc(
+                color = Color.LightGray,
+                startAngle = startAngle,
+                sweepAngle = sweepAngle,
+                useCenter = false,
+                style = Stroke(width = strokeWidth, cap = StrokeCap.Round)
+            )
+
+            drawArc(
+                color = Color(0xFF2196F3),
+                startAngle = startAngle,
+                sweepAngle = sweepAngle * progress.coerceIn(0f, 1f),
+                useCenter = false,
+                style = Stroke(width = strokeWidth, cap = StrokeCap.Round)
+            )
+        }
+
+        // Center Content
+        Column(
+            horizontalAlignment = Alignment.CenterHorizontally,
+            verticalArrangement = Arrangement.Center
+        ) {
+            Image(
+                painter = painterResource(id = R.drawable.drop),
+                contentDescription = "Water Drop",
+                modifier = Modifier.size(80.dp)
+            )
+
+            Spacer(modifier = Modifier.height(8.dp))
 
             Text(
-                text = "You have achieved your\nStep Goal for today!",
-                modifier = modifier
-                    .align(Alignment.CenterHorizontally)
-                    .padding(top = 15.dp),
-                fontSize = 24.sp,
+                text = "$currentIntake",
+                style = MaterialTheme.typography.headlineMedium,
                 fontWeight = FontWeight.Bold
             )
 
-            GoalSummaryScreenTwoItems{
-                showSheet = true
+            Text(
+                text = "/$goal $unit", // 🆕 Show correct unit
+                style = MaterialTheme.typography.bodyMedium,
+                color = Color.Gray
+            )
+        }
+
+        // Bottom Buttons
+        Column(
+            horizontalAlignment = Alignment.CenterHorizontally,
+            verticalArrangement = Arrangement.Bottom,
+            modifier = Modifier
+                .align(Alignment.BottomCenter)
+        ) {
+            Spacer(modifier = Modifier.height(20.dp))
+
+            Row(
+                horizontalArrangement = Arrangement.Center,
+                verticalAlignment = Alignment.CenterVertically
+            ) {
+                Button(
+                    onClick = {
+                        if (currentIntake < goal) {
+                            val addedAmount = when (unit) {
+                                "mL" -> 300 // 300 mL
+                                "L" -> (0.3f * 1000).toInt() // 0.3 L = 300 mL
+                                "US Oz" -> (10f * 29.5735f).toInt() // 10 oz ≈ 296 mL
+                                "UK Oz" -> (10f * 28.4131f).toInt() // 10 oz ≈ 284 mL
+                                else -> 300 // default fallback
+                            }
+
+                            currentIntake += addedAmount
+                            SharedPrefManager(context).saveWaterTake(currentIntake)
+
+                            if (currentIntake >= goal) {
+                                showDialog = true
+                            }
+                        }
+                    },
+                    colors = ButtonDefaults.buttonColors(containerColor = Color(0xFF2196F3))
+                ) {
+                    Text(
+                        text = when (unit) {
+                            "mL" -> "Drink (300 mL)"
+                            "L" -> "Drink (0.3 L)"
+                            "US Oz" -> "Drink (10 Oz)"
+                            "UK Oz" -> "Drink (10 Oz)"
+                            else -> "Drink (300 mL)"
+                        }
+                    )
+                }
+
+                Spacer(modifier = Modifier.width(10.dp))
+
+                Image(
+                    painter = painterResource(id = R.drawable.water_bottle),
+                    contentDescription = "Water Bottle",
+                    modifier = Modifier.size(50.dp)
+                )
             }
         }
     }
-}
 
-@Composable
-fun GoalSummaryScreenTwoItems(onclick: ()->  Unit) {
-    Column(
-        modifier = Modifier
-            .fillMaxWidth()
-            .padding(16.dp)
-            .fillMaxHeight()
-            .background(Color.White),
-        horizontalAlignment = Alignment.CenterHorizontally,
-        verticalArrangement = Arrangement.SpaceBetween
-    ) {
-        Row(
-            modifier = Modifier
-                .fillMaxWidth()
-                .background(Color.White),
-            horizontalArrangement = Arrangement.SpaceEvenly,
-            verticalAlignment = Alignment.CenterVertically
-        ) {
-            StatItem(title = "Total Intake", value = "5,456")
-            DividerLine()
-            StatItem(title = "Goal", value = "515")
-        }
-
-
-        FloatingActionButton(
-            onClick = {
-                onclick()
-            },
-            Modifier
-                .align(Alignment.CenterHorizontally)
-                .padding(top = 50.dp)
-        ) {
-            Image(
-                painter = painterResource(id = R.drawable.health_plus),
-                contentDescription = "insert new record",
-                modifier = Modifier.size(50.dp)
-            )
-        }
-    }
-}
-
-@Composable
-fun StatItem(title: String, value: String) {
-    Column(horizontalAlignment = Alignment.CenterHorizontally) {
-        Text(
-            text = title, color = Color.Gray, fontWeight = FontWeight.Bold, fontSize = 12.sp
-        )
-        Text(
-            text = value, fontWeight = FontWeight.Bold, fontSize = 18.sp, color = Color.Black
+    // Show dialog when water intake goal is full
+    if (showDialog) {
+        AlertDialog(
+            onDismissRequest = { showDialog = false },
+            title = { Text(text = "Congratulations!") },
+            text = { Text(text = "Water Intake Full 🎉") },
+            confirmButton = {
+                Button(
+                    onClick = { showDialog = false }
+                ) {
+                    Text("OK")
+                }
+            }
         )
     }
-}
-
-@Composable
-fun DividerLine() {
-    Box(
-        modifier = Modifier
-            .height(40.dp)
-            .width(1.dp)
-            .background(Color(0xFFE0E0E0))
-    )
 }

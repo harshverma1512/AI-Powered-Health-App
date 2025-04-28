@@ -19,6 +19,7 @@ import androidx.compose.ui.*
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.layout.ContentScale
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.colorResource
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.font.FontWeight
@@ -299,8 +300,9 @@ fun StepsTakenCard(
 
 @Composable
 fun HydrationCard(
-    currentMl: Int = 900,
-    goalMl: Int = 2000,
+    currentMl: Int = SharedPrefManager(context = LocalContext.current).getWaterTake(),
+    goalMl: Int = SharedPrefManager(context = LocalContext.current).getWaterGoal(),
+    unit: String = SharedPrefManager(context = LocalContext.current).getWaterUnit(),
     navController: NavController
 ) {
     val progress = currentMl.toFloat() / goalMl
@@ -329,7 +331,7 @@ fun HydrationCard(
                     contentAlignment = Alignment.Center
                 ) {
                     Icon(
-                        painter = painterResource(id = R.drawable.drop), // Replace with your drop icon
+                        painter = painterResource(id = R.drawable.drop),
                         contentDescription = "Hydration",
                         tint = Color(0xFF7D8FAB),
                         modifier = Modifier.size(26.dp)
@@ -338,7 +340,9 @@ fun HydrationCard(
 
                 Spacer(modifier = Modifier.width(12.dp))
 
-                Column {
+                Column(
+                    modifier = Modifier.fillMaxWidth()
+                ) {
                     Text(
                         text = "Hydration",
                         style = MaterialTheme.typography.titleMedium.copy(
@@ -349,7 +353,7 @@ fun HydrationCard(
 
                     Spacer(modifier = Modifier.height(4.dp))
 
-                    // Progress bar composed of segments
+                    // Progress bar
                     Row(horizontalArrangement = Arrangement.spacedBy(4.dp)) {
                         repeat(8) { index ->
                             Box(
@@ -357,8 +361,8 @@ fun HydrationCard(
                                     .height(6.dp)
                                     .weight(1f)
                                     .background(
-                                        if (index < (progress * 8).toInt()) Color(0xFF2563EB) // Blue
-                                        else Color(0xFFE5E7EB), // Light grey
+                                        if (index < (progress * 8).toInt()) Color(0xFF2563EB)
+                                        else Color(0xFFE5E7EB),
                                         shape = RoundedCornerShape(50)
                                     )
                             )
@@ -367,17 +371,18 @@ fun HydrationCard(
 
                     Spacer(modifier = Modifier.height(4.dp))
 
+                    // Progress texts
                     Row(
                         horizontalArrangement = Arrangement.SpaceBetween,
                         modifier = Modifier.fillMaxWidth()
                     ) {
                         Text(
-                            text = "${currentMl}ml",
+                            text = "$currentMl $unit", // 🆕 show current value with unit
                             style = MaterialTheme.typography.bodySmall,
                             color = Color(0xFF9CA3AF)
                         )
                         Text(
-                            text = "${goalMl}ml",
+                            text = "$goalMl $unit", // 🆕 show goal value with unit
                             style = MaterialTheme.typography.bodySmall,
                             color = Color(0xFF9CA3AF)
                         )
@@ -387,6 +392,7 @@ fun HydrationCard(
         }
     }
 }
+
 
 
 @Composable

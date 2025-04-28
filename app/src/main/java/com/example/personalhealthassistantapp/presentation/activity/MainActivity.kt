@@ -34,6 +34,7 @@ import com.example.personalhealthassistantapp.presentation.ScreensName
 import com.example.personalhealthassistantapp.presentation.SleepTrackingScreen
 import com.example.personalhealthassistantapp.presentation.SplashScreen
 import com.example.personalhealthassistantapp.presentation.SymptomsInputScreen
+import com.example.personalhealthassistantapp.presentation.WaterGoalSetupScreen
 import com.example.personalhealthassistantapp.presentation.WeightPickerScreen
 import com.example.personalhealthassistantapp.presentation.ui.PersonalHealthAssistantAppTheme
 import com.example.personalhealthassistantapp.presentation.viewmodel.ChatViewModel
@@ -174,6 +175,9 @@ class MainActivity : ComponentActivity() {
             }
             composable(ScreensName.HydrationScreen.name){
                 HydrationRecord(navController = navController)
+            }
+            composable(ScreensName.HydrationGoalScreen.name){
+                WaterGoalSetupScreen(navController = navController)
             }
         }
 

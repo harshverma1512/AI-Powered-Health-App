@@ -34,6 +34,11 @@ class SharedPrefManager(context: Context) {
         const val KEY_WAKE_MIN = "wake_min"
         const val SELECTED_DAYS = "selected_days"
 
+        //Water Take
+        const val WATER_TAKE = "water_take"
+        const val WATER_GOAL = "water_goal"
+        const val WATER_UNIT = "water_unit"
+
 
     }
 
@@ -48,11 +53,31 @@ class SharedPrefManager(context: Context) {
     fun getSleepMinute(): Int = sharedPref.getInt(KEY_SLEEP_MIN, 0)
     fun getWakeHour(): Int = sharedPref.getInt(KEY_WAKE_HOUR, 6)
     fun getWakeMinute(): Int = sharedPref.getInt(KEY_WAKE_MIN, 0)
+    fun getWaterTake(): Int = sharedPref.getInt(WATER_TAKE, 0)
+    fun getWaterGoal(): Int = sharedPref.getInt(WATER_GOAL, 0)
+    fun getWaterUnit() : String = sharedPref.getString("water_unit", "ml") ?: "ml"
 
     fun saveWakeTime(hour: Int, minute: Int) {
         sharedPref.edit {
             putInt(KEY_WAKE_HOUR, hour)
             putInt(KEY_WAKE_MIN, minute)
+        }
+    }
+
+    fun saveWaterUnit(unit: String) {
+        sharedPref.edit {
+            putString(WATER_UNIT, unit)
+        }
+    }
+
+    fun saveWaterTake(waterTake: Int) {
+        sharedPref.edit {
+            putInt(WATER_TAKE, waterTake)
+        }
+    }
+    fun saveWaterGoal(waterGoal: Int) {
+        sharedPref.edit {
+            putInt(WATER_GOAL, waterGoal)
         }
     }
 

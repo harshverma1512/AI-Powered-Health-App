@@ -55,7 +55,7 @@ fun HealthTextAnalysisScreen(navController: NavController, chatViewModel: ChatVi
 
                 Spacer(modifier = Modifier.height(24.dp))
 
-                Text(text = chatViewModel.symptomsDiseaseResponse)
+                Text(text = chatViewModel.symptomsDiseaseResponse.value)
 
                 Spacer(modifier = Modifier.height(16.dp))
             }

@@ -24,7 +24,7 @@ class ChatViewModel @Inject constructor() : ViewModel() {
     var userData by mutableStateOf<Map<String, Any>?>(null)
 
     private val _selectedSymptoms = mutableStateListOf<String>()
-    var symptomsDiseaseResponse = ""
+    var symptomsDiseaseResponse = mutableStateOf("")
 
     init {
         fetchCurrentUserData(onResult = {
@@ -81,10 +81,10 @@ class ChatViewModel @Inject constructor() : ViewModel() {
                 val response = chat.sendMessage("I will provide you with a list of symptoms. Based on those, please suggest what possible sickness or condition I might have. Also, briefly explain why you think it's that sickness. Please keep your response under 250 words. Here are the symptoms: $symptoms")
                 Log.d("check disease", response.text.toString())
                 response.text?.let {
-                    symptomsDiseaseResponse = it
+                    symptomsDiseaseResponse.value = it
                 }
             }catch (e : Exception){
-                symptomsDiseaseResponse = "Enable to fetch response"
+                symptomsDiseaseResponse.value = "Enable to fetch response"
             }
         }
     }
