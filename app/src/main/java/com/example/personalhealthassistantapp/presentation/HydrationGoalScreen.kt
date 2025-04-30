@@ -68,8 +68,9 @@ fun WaterGoalSetupScreen(
                 Text(
                     text = "Your daily goal is",
                     style = MaterialTheme.typography.titleLarge,
-                    color = Color.Black
+                    color = Color.Black, fontWeight = FontWeight.Bold
                 )
+                Text(text = "Every day it will be restart automatically", modifier.padding(top =  5.dp))
 
                 Spacer(modifier = Modifier.height(24.dp))
 

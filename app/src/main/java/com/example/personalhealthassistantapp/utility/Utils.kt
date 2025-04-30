@@ -9,11 +9,16 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.painterResource
 import androidx.navigation.NavController
+import androidx.work.ExistingPeriodicWorkPolicy
+import androidx.work.PeriodicWorkRequestBuilder
+import androidx.work.WorkManager
 import com.example.personalhealthassistantapp.R
+import com.example.personalhealthassistantapp.domain.services.ReminderWorker
 import com.example.personalhealthassistantapp.presentation.ScreensName
 import com.google.firebase.Firebase
 import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.firestore.firestore
+import java.util.concurrent.TimeUnit
 
 
 object Utils {
@@ -32,6 +37,33 @@ object Utils {
                 onError(it)
             }
     }
+
+
+    private fun scheduleHydrationReminder(context: Context) {
+        val workRequest = PeriodicWorkRequestBuilder<ReminderWorker>(
+            3, TimeUnit.HOURS
+        ).build()
+
+        WorkManager.getInstance(context).enqueueUniquePeriodicWork(
+            "HydrationReminderWork",
+            ExistingPeriodicWorkPolicy.KEEP,
+            workRequest
+        )
+    }
+
+    private fun cancelHydrationReminder(context: Context) {
+        WorkManager.getInstance(context).cancelUniqueWork("SleepReminderWork")
+    }
+
+    fun setHydrationReminderEnabled(context: Context, enabled: Boolean) {
+        if (enabled) {
+            scheduleHydrationReminder(context)
+        } else {
+            cancelHydrationReminder(context)
+        }
+    }
+
+
 
     fun fetchCurrentUserData(
         onResult: (Map<String, Any>?) -> Unit,

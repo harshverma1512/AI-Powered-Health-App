@@ -29,6 +29,7 @@ import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
+import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
 import androidx.compose.runtime.derivedStateOf
 import androidx.compose.runtime.rememberCoroutineScope
@@ -91,96 +92,99 @@ fun HeightPickerScreen(
             }
     }
 
-    Column(
-        modifier = modifier
-            .fillMaxSize()
-            .background(color = colorResource(id = R.color.backgroundColor))
-            .padding(horizontal = 24.dp),
-        horizontalAlignment = Alignment.CenterHorizontally, verticalArrangement = Arrangement.SpaceAround
-    ) {
-        WeightToolbar(onBackClick = {
-            navController.popBackStack()
-        }, onSkipClick = {
-            navController.navigate(ScreensName.HomeScreen.name)
-        })
-        Spacer(modifier = Modifier.height(32.dp))
-
-        Text("What is your height?", fontSize = 35.sp, fontWeight = FontWeight.Bold)
-
-        Spacer(modifier = Modifier.height(32.dp))
-
-        Box(
-            modifier = Modifier
-                .fillMaxWidth()
-                .height(pickerHeight),
-            contentAlignment = Alignment.Center
+    Scaffold { innerPadding ->
+        Column(
+            modifier = modifier
+                .fillMaxSize().padding(innerPadding)
+                .background(color = colorResource(id = R.color.backgroundColor))
+                .padding(horizontal = 24.dp),
+            horizontalAlignment = Alignment.CenterHorizontally,
+            verticalArrangement = Arrangement.SpaceAround
         ) {
-            // The scroller
-            LazyColumn(
-                state = listState,
-                contentPadding = PaddingValues(vertical = pickerHeight / 3),
-                verticalArrangement = Arrangement.spacedBy(itemSpacing),
-                modifier = Modifier.fillMaxSize()
+            WeightToolbar(onBackClick = {
+                navController.popBackStack()
+            }, onSkipClick = {
+                navController.navigate(ScreensName.HomeScreen.name)
+            })
+            Spacer(modifier = Modifier.height(32.dp))
+
+            Text("What is your height?", fontSize = 35.sp, fontWeight = FontWeight.Bold)
+
+            Spacer(modifier = Modifier.height(32.dp))
+
+            Box(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .height(pickerHeight),
+                contentAlignment = Alignment.Center
             ) {
-                items((minHeight..maxHeight).toList()) { height ->
-                    val isSelected = height == selectedHeight
-                    Box(
-                        modifier = Modifier
-                            .fillMaxWidth()
-                            .clickable {
-                                selectedHeight = height
-                                coroutineScope.launch {
-                                    listState.animateScrollToItem(height - minHeight)
+                // The scroller
+                LazyColumn(
+                    state = listState,
+                    contentPadding = PaddingValues(vertical = pickerHeight / 3),
+                    verticalArrangement = Arrangement.spacedBy(itemSpacing),
+                    modifier = Modifier.fillMaxSize()
+                ) {
+                    items((minHeight..maxHeight).toList()) { height ->
+                        val isSelected = height == selectedHeight
+                        Box(
+                            modifier = Modifier
+                                .fillMaxWidth()
+                                .clickable {
+                                    selectedHeight = height
+                                    coroutineScope.launch {
+                                        listState.animateScrollToItem(height - minHeight)
+                                    }
                                 }
-                            }
-                            .wrapContentHeight()
-                            .padding(top = 15.dp),
-                        contentAlignment = Alignment.Center
-                    ) {
-                        Text(
-                            text = "$height cm",
-                            fontSize = if (isSelected) 36.sp else 20.sp,
-                            fontWeight = if (isSelected) FontWeight.Bold else FontWeight.Normal,
-                            color = if (isSelected) Color.White else Color.Black,
-                            modifier = if (isSelected) Modifier
-                                .background(Color(0xFF2979FF), RoundedCornerShape(12.dp))
-                                .padding(horizontal = 30.dp, vertical = 12.dp)
-                            else Modifier
-                        )
+                                .wrapContentHeight()
+                                .padding(top = 15.dp),
+                            contentAlignment = Alignment.Center
+                        ) {
+                            Text(
+                                text = "$height cm",
+                                fontSize = if (isSelected) 36.sp else 20.sp,
+                                fontWeight = if (isSelected) FontWeight.Bold else FontWeight.Normal,
+                                color = if (isSelected) Color.White else Color.Black,
+                                modifier = if (isSelected) Modifier
+                                    .background(Color(0xFF2979FF), RoundedCornerShape(12.dp))
+                                    .padding(horizontal = 30.dp, vertical = 12.dp)
+                                else Modifier
+                            )
+                        }
                     }
                 }
             }
-        }
 
-        Spacer(modifier = Modifier.height(32.dp))
+            Spacer(modifier = Modifier.height(32.dp))
 
-        Button(
-            onClick = {
-                val heightData = mapOf(
-                    SharedPrefManager.HEIGHT to selectedHeight
-                )
-                saveUserData(heightData, onSuccess = {
-                    Toast.makeText(
-                        navController.context,
-                        "Height update successfully!",
-                        Toast.LENGTH_SHORT
-                    ).show()
-                    navController.navigate(ScreensName.HomeScreen.name)
-                }, onError = {
-                    Toast.makeText(
-                        navController.context,
-                        "Failed to update weight: ${it.message}",
-                        Toast.LENGTH_SHORT
-                    ).show()
-                })
-            },
-            modifier = Modifier
-                .fillMaxWidth()
-                .height(50.dp),
-            shape = RoundedCornerShape(12.dp),
-            colors = ButtonDefaults.buttonColors(containerColor = colorResource(id = R.color.btn_color))
-        ) {
-            Text("Continue", fontSize = 16.sp)
+            Button(
+                onClick = {
+                    val heightData = mapOf(
+                        SharedPrefManager.HEIGHT to selectedHeight
+                    )
+                    saveUserData(heightData, onSuccess = {
+                        Toast.makeText(
+                            navController.context,
+                            "Height update successfully!",
+                            Toast.LENGTH_SHORT
+                        ).show()
+                        navController.navigate(ScreensName.HomeScreen.name)
+                    }, onError = {
+                        Toast.makeText(
+                            navController.context,
+                            "Failed to update weight: ${it.message}",
+                            Toast.LENGTH_SHORT
+                        ).show()
+                    })
+                },
+                modifier = Modifier
+                    .fillMaxWidth().padding(bottom = 10.dp)
+                    .height(50.dp),
+                shape = RoundedCornerShape(12.dp),
+                colors = ButtonDefaults.buttonColors(containerColor = colorResource(id = R.color.btn_color))
+            ) {
+                Text("Continue", fontSize = 16.sp)
+            }
         }
     }
 }

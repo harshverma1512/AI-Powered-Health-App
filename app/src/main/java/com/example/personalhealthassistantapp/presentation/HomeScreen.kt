@@ -1,8 +1,8 @@
 package com.example.personalhealthassistantapp.presentation
 
+import android.annotation.SuppressLint
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
-import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
@@ -13,6 +13,7 @@ import androidx.compose.material.icons.filled.Notifications
 import androidx.compose.material.icons.filled.Search
 import androidx.compose.material3.*
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.*
@@ -26,7 +27,7 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.navigation.NavController
-import coil.compose.AsyncImage
+import coil3.compose.AsyncImage
 import com.example.personalhealthassistantapp.R
 import com.example.personalhealthassistantapp.presentation.viewmodel.ChatViewModel
 import com.example.personalhealthassistantapp.utility.SharedPrefManager
@@ -34,12 +35,16 @@ import com.example.personalhealthassistantapp.utility.Utils.getGreeting
 import com.google.firebase.auth.FirebaseAuth
 import kotlin.random.Random
 
+@SuppressLint("StateFlowValueCalledInComposition")
 @Composable
 fun HomeScreen(navController: NavController,  chatViewModel: ChatViewModel) {
 
+    LaunchedEffect(Unit) {
+        chatViewModel.getUserData()
+    }
+
     Scaffold {innerPadding ->
         val score = chatViewModel.score
-        val imageUrl = chatViewModel.userData?.get(SharedPrefManager.PHOTO_URL)
 
         Column(
             modifier = Modifier
@@ -52,8 +57,8 @@ fun HomeScreen(navController: NavController,  chatViewModel: ChatViewModel) {
                     .fillMaxSize(), contentPadding = PaddingValues(16.dp),
                 verticalArrangement = Arrangement.spacedBy(16.dp)
             ) {
-                item { TopBarSection(navController, imageUrl) }
-                item { HealthScoreSection(score, navController) }
+                item { TopBarSection(navController) }
+                item { HealthScoreSection(score) }
                 item { VitalsSection(navController) }
                 item { FitnessTrackerSection(navController) }
                 item { WellnessChatbotSection(navController) }
@@ -65,7 +70,7 @@ fun HomeScreen(navController: NavController,  chatViewModel: ChatViewModel) {
 }
 
 @Composable
-fun TopBarSection(navController: NavController, imageUrl: Any?, ) {
+fun TopBarSection(navController: NavController) {
     val user = FirebaseAuth.getInstance().currentUser
     val displayName = user?.displayName ?: "User"
     val photoUrl = user?.photoUrl
@@ -86,7 +91,7 @@ fun TopBarSection(navController: NavController, imageUrl: Any?, ) {
                         .clip(CircleShape)
                         .background(Color.Gray)
                 ) {
-                    imageUrl?.let {
+                    photoUrl?.let {
                         AsyncImage(
                             model = it,
                             contentDescription = "Profile Image",
@@ -122,7 +127,7 @@ fun TopBarSection(navController: NavController, imageUrl: Any?, ) {
 
 
 @Composable
-fun HealthScoreSection(score : Int? , navController: NavController) {
+fun HealthScoreSection(score : Int?) {
     val randomColor = remember {
         Color(
             red = Random.nextFloat(),
@@ -179,7 +184,7 @@ fun HealthScoreSection(score : Int? , navController: NavController) {
                     color = Color(0xFF1E1E1E)
                 )
                 Text(
-                    text = "Based on your data, we think your\nhealth BMI status is above average.",
+                    text = getBMIStatusMessage(score?.toDouble() ?: 0.0),
                     fontSize = 14.sp,
                     color = Color.Gray
                 )
@@ -187,6 +192,21 @@ fun HealthScoreSection(score : Int? , navController: NavController) {
         }
     }
 }
+
+
+fun getBMIStatusMessage(bmi: Double): String {
+    return when {
+        bmi < 16.0 -> "Severely underweight – please consult a healthcare provider."
+        bmi < 17.0 -> "Moderately underweight – consider improving your nutrition."
+        bmi < 18.5 -> "Mildly underweight – a slight weight gain may be beneficial."
+        bmi < 25.0 -> "You are in the healthy weight range – keep up the good lifestyle!"
+        bmi < 30.0 -> "You are overweight – consider adopting a more active routine."
+        bmi < 35.0 -> "Obese Class I – managing diet and exercise is recommended."
+        bmi < 40.0 -> "Obese Class II – seek guidance for healthy weight loss."
+        else       -> "Obese Class III – urgent medical advice is highly recommended."
+    }
+}
+
 
 @Composable
 fun VitalsSection(navController: NavController) {
@@ -305,7 +325,7 @@ fun HydrationCard(
     unit: String = SharedPrefManager(context = LocalContext.current).getWaterUnit(),
     navController: NavController
 ) {
-    val progress = currentMl.toFloat() / goalMl
+    val progress = currentMl.toFloat() / convertToMilliliters(goalMl.toFloat(), unit)
 
     Card(
         modifier = Modifier
@@ -362,8 +382,7 @@ fun HydrationCard(
                                     .weight(1f)
                                     .background(
                                         if (index < (progress * 8).toInt()) Color(0xFF2563EB)
-                                        else Color(0xFFE5E7EB),
-                                        shape = RoundedCornerShape(50)
+                                        else Color(0xFFE5E7EB), shape = RoundedCornerShape(50)
                                     )
                             )
                         }

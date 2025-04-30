@@ -3,6 +3,7 @@ package com.example.personalhealthassistantapp.presentation.viewmodel
 import android.os.Build
 import android.util.Log
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableIntStateOf
 import androidx.compose.runtime.mutableStateListOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.setValue
@@ -14,19 +15,25 @@ import com.example.personalhealthassistantapp.utility.Utils
 import com.example.personalhealthassistantapp.utility.Utils.fetchCurrentUserData
 import com.google.ai.client.generativeai.GenerativeModel
 import dagger.hilt.android.lifecycle.HiltViewModel
+import io.ktor.util.valuesOf
+import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.launch
 import javax.inject.Inject
+import kotlin.math.pow
+import kotlin.math.round
 
 @HiltViewModel
 class ChatViewModel @Inject constructor() : ViewModel() {
 
-    var score by mutableStateOf<Int?>(null)
-    var userData by mutableStateOf<Map<String, Any>?>(null)
+    var score by mutableIntStateOf(0)
+    private var userData by mutableStateOf<Map<String, Any>?>(null)
 
     private val _selectedSymptoms = mutableStateListOf<String>()
     var symptomsDiseaseResponse = mutableStateOf("")
 
-    init {
+    val messageList = mutableStateListOf<MessageModel>()
+
+    fun getUserData(){
         fetchCurrentUserData(onResult = {
             userData = it
             Log.d("checkUserData", it.toString())
@@ -43,8 +50,6 @@ class ChatViewModel @Inject constructor() : ViewModel() {
         })
     }
 
-    val messageList = mutableStateListOf<MessageModel>()
-
     private val generativeModel: GenerativeModel = GenerativeModel(
         modelName = "gemini-1.5-pro", // Change to a supported model
         apiKey = Utils.GEMINI_KEY
@@ -60,7 +65,9 @@ class ChatViewModel @Inject constructor() : ViewModel() {
         findDiseaseBasedOnSymptoms(symptoms)
     }
 
-    private fun calculateBMI(weight: Long, weightUnit: String, heightCm: Long): Double {
+    private fun calculateBMI(
+        weight: Long = "0".toLong(), weightUnit: String = "Kg", heightCm: Long = "0".toLong()
+    ): Double {
         val weightInKg = if (weightUnit.lowercase() == "lbs") {
             weight.toDouble() * 0.453592
         } else {
@@ -70,7 +77,6 @@ class ChatViewModel @Inject constructor() : ViewModel() {
 
         return (weightInKg / (heightInMeters * heightInMeters)).roundTo(2)
     }
-
 
 
     private fun findDiseaseBasedOnSymptoms(symptoms: List<String>) {

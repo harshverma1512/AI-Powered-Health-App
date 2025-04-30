@@ -17,7 +17,6 @@ import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
-import coil.compose.rememberAsyncImagePainter
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
@@ -56,6 +55,7 @@ import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.navigation.NavController
+import coil3.compose.rememberAsyncImagePainter
 import com.example.personalhealthassistantapp.R
 import com.example.personalhealthassistantapp.utility.SharedPrefManager
 import com.google.firebase.auth.FirebaseAuth
@@ -232,14 +232,16 @@ fun ProfileScreen(navController: NavController = NavController(LocalContext.curr
         Text(
             text = "Logout",
             color = Color.Red,
-            modifier = Modifier.align(Alignment.CenterHorizontally).clickable {
-                Firebase.auth.signOut()
-                SharedPrefManager(context).clearUserDetails()
-                navController.navigate(ScreensName.LoginScreen.name){
-                    popUpTo(0)
-                    launchSingleTop = true
-                }
-            },
+            modifier = Modifier
+                .align(Alignment.CenterHorizontally)
+                .clickable {
+                    Firebase.auth.signOut()
+                    SharedPrefManager(context).clearUserDetails()
+                    navController.navigate(ScreensName.LoginScreen.name) {
+                        popUpTo(0)
+                        launchSingleTop = true
+                    }
+                },
             fontWeight = FontWeight.Bold
         )
     }
@@ -256,7 +258,10 @@ fun saveUserProfile(
     val user = FirebaseAuth.getInstance().currentUser
     val db = Firebase.firestore
 
-    val userId = user?.uid ?: return
+    val userId = user?.uid ?: run {
+        Toast.makeText(context, "Some error occurred", Toast.LENGTH_SHORT).show()
+        return
+    }
 
     val userData = hashMapOf(
         SharedPrefManager.NAME to fullName,

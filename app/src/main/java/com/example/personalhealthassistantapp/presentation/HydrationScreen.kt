@@ -28,6 +28,7 @@ import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableIntStateOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
@@ -101,17 +102,18 @@ fun HydrationRecord(modifier: Modifier = Modifier, navController: NavController)
         }
     }
 }
+
 @Composable
 fun HalfCircularWaterTracker(
     currentIntake: Int = 0,
     goal: Int,
     modifier: Modifier = Modifier
 ) {
-    var currentIntake by remember { mutableStateOf(currentIntake) }
-    var showDialog by remember { mutableStateOf(false) }
     val context = LocalContext.current
-    val unit = SharedPrefManager(context).getWaterUnit() ?: "mL" // 🆕 Get unit
-    val progress = currentIntake.toFloat() / goal.toFloat()
+    var showDialog by remember { mutableStateOf(false) }
+    var currentIntake by remember { mutableIntStateOf(currentIntake) }
+    val unit = SharedPrefManager(context).getWaterUnit() ?: "mL"
+    val progress = currentIntake.toFloat() / convertToMilliliters(goal.toFloat(), unit)
 
     Box(
         contentAlignment = Alignment.Center,
@@ -241,3 +243,15 @@ fun HalfCircularWaterTracker(
         )
     }
 }
+
+fun convertToMilliliters(value: Float, unit: String): Int {
+    return when (unit) {
+        "mL" -> value.toInt()
+        "L" -> (value * 1000f).toInt()
+        "US Oz" -> (value * 29.5735f).toInt()
+        "UK Oz" -> (value * 28.4131f).toInt()
+        else -> value.toInt() // fallback to mL
+    }
+}
+
+

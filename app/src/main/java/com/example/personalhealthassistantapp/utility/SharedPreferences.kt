@@ -4,6 +4,7 @@ import android.content.SharedPreferences
 import android.content.Context
 import androidx.core.content.edit
 import java.time.DayOfWeek
+import java.time.LocalDate
 
 class SharedPrefManager(context: Context) {
 
@@ -24,8 +25,8 @@ class SharedPrefManager(context: Context) {
         const val WEIGHT = "weight"
         const val WEIGHT_MEASUREMENT = "weight_measurement"
         const val HEIGHT = "height"
-
-
+        const val HEALTH_NOTIFY = "health_notify"
+        const val HEALTH_ASSISTANT_NOTIFY = "health_assistant_notify"
 
         // Alarm keys
         const val KEY_SLEEP_HOUR = "sleep_hour"
@@ -38,7 +39,7 @@ class SharedPrefManager(context: Context) {
         const val WATER_TAKE = "water_take"
         const val WATER_GOAL = "water_goal"
         const val WATER_UNIT = "water_unit"
-
+        const val TODAY = "today"
 
     }
 
@@ -56,11 +57,32 @@ class SharedPrefManager(context: Context) {
     fun getWaterTake(): Int = sharedPref.getInt(WATER_TAKE, 0)
     fun getWaterGoal(): Int = sharedPref.getInt(WATER_GOAL, 0)
     fun getWaterUnit() : String = sharedPref.getString("water_unit", "ml") ?: "ml"
+    fun getToday() : String = sharedPref.getString(TODAY, LocalDate.now().toString()) ?: LocalDate.now().toString()
+    fun getHealthNotify() : Boolean = sharedPref.getBoolean(HEALTH_NOTIFY, true)
+    fun getHealthAssistantNotify() : Boolean = sharedPref.getBoolean(HEALTH_ASSISTANT_NOTIFY, false)
 
     fun saveWakeTime(hour: Int, minute: Int) {
         sharedPref.edit {
             putInt(KEY_WAKE_HOUR, hour)
             putInt(KEY_WAKE_MIN, minute)
+        }
+    }
+
+    fun saveHealthNotify(healthNotify: Boolean) {
+        sharedPref.edit {
+            putBoolean(HEALTH_NOTIFY, healthNotify)
+        }
+    }
+
+    fun saveHealthAssistantNotify(healthAssistantNotify: Boolean) {
+        sharedPref.edit {
+            putBoolean(HEALTH_ASSISTANT_NOTIFY, healthAssistantNotify)
+        }
+    }
+
+    fun saveTodayDate(today: LocalDate?) {
+        sharedPref.edit {
+            putString(TODAY, today.toString())
         }
     }
 
@@ -127,5 +149,10 @@ class SharedPrefManager(context: Context) {
     // Clear all data
     fun clearAll() {
         sharedPref.edit() { clear() }
+    }
+
+    fun clearHydrationData() {
+        sharedPref.edit(){remove(WATER_TAKE)}
+        sharedPref.edit(){remove(WATER_GOAL)}
     }
 }

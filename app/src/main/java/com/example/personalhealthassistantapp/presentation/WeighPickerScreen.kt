@@ -33,6 +33,7 @@ import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.Icon
+import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
 import androidx.compose.runtime.snapshotFlow
 import androidx.compose.ui.Alignment
@@ -74,7 +75,8 @@ fun WeightPickerScreen(
                 if (visibleItems.isEmpty()) return@collect
 
                 // Center of the LazyRow viewport
-                val viewportCenter = layoutInfo.viewportStartOffset + (layoutInfo.viewportEndOffset - layoutInfo.viewportStartOffset) / 2
+                val viewportCenter =
+                    layoutInfo.viewportStartOffset + (layoutInfo.viewportEndOffset - layoutInfo.viewportStartOffset) / 2
 
                 // Find the item whose center is closest to the viewport center
                 val centerItem = visibleItems.minByOrNull {
@@ -92,137 +94,141 @@ fun WeightPickerScreen(
     }
 
 
-
-    Column(
-        modifier = modifier
-            .fillMaxSize()
-            .background(color = colorResource(id = R.color.backgroundColor))
-            .padding(horizontal = 24.dp), verticalArrangement = Arrangement.SpaceAround
-    ) {
-        WeightToolbar(onBackClick = {
-                navController.popBackStack()
-        }, onSkipClick = {
-            navController.navigate(ScreensName.HomeScreen.name)
-        })
-
-        Text(
-            "What is your weight?",
-            fontSize = 32.sp,
-            fontWeight = FontWeight.Bold,
-            modifier = Modifier
-        )
-
-
+    Scaffold { innerPadding ->
         Column(
-            modifier = Modifier.fillMaxWidth(), horizontalAlignment = Alignment.CenterHorizontally
+            modifier = modifier
+                .fillMaxSize().padding(innerPadding)
+                .background(color = colorResource(id = R.color.backgroundColor))
+                .padding(horizontal = 24.dp), verticalArrangement = Arrangement.SpaceAround
         ) {
-            Row(
-                Modifier
-                    .clip(RoundedCornerShape(12.dp))
-                    .background(color = colorResource(id = R.color.white))
-            ) {
-                UnitToggleButton("lbs", selectedUnit == "lbs") { selectedUnit = "lbs" }
-                Spacer(modifier = Modifier.width(10.dp))
-                UnitToggleButton("kg", selectedUnit == "kg") { selectedUnit = "kg" }
-            }
-
-            Spacer(Modifier.height(150.dp))
+            WeightToolbar(onBackClick = {
+                navController.popBackStack()
+            }, onSkipClick = {
+                navController.navigate(ScreensName.HomeScreen.name)
+            })
 
             Text(
-                "$selectedWeight $selectedUnit",
-                fontSize = 48.sp,
+                "What is your weight?",
+                fontSize = 32.sp,
                 fontWeight = FontWeight.Bold,
-                color = colorResource(id = R.color.black)
+                modifier = Modifier
             )
 
-            Spacer(Modifier.height(16.dp))
 
-            // Scrollable weight scale
-            // Scrollable weight scale with better spacing
-            Box(
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .height(120.dp) // Increased height
+            Column(
+                modifier = Modifier.fillMaxWidth(),
+                horizontalAlignment = Alignment.CenterHorizontally
             ) {
-                LazyRow(
-                    state = scrollState,
-                    contentPadding = PaddingValues(horizontal = 80.dp),
-                    horizontalArrangement = Arrangement.spacedBy(18.dp),
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .align(Alignment.Center)
-                        .padding(vertical = 24.dp) // Add padding to avoid icon collision
+                Row(
+                    Modifier
+                        .clip(RoundedCornerShape(12.dp))
+                        .background(color = colorResource(id = R.color.white))
                 ) {
-                    items((minWeight..maxWeight).toList()) { weight ->
-                        Column(horizontalAlignment = Alignment.CenterHorizontally) {
-                            Box(
-                                modifier = Modifier
-                                    .width(2.dp)
-                                    .height(30.dp)
-                                    .background(Color.Gray)
-                            )
-                            Text("$weight", fontSize = 12.sp)
-                        }
-                    }
+                    UnitToggleButton("lbs", selectedUnit == "lbs") { selectedUnit = "lbs" }
+                    Spacer(modifier = Modifier.width(10.dp))
+                    UnitToggleButton("kg", selectedUnit == "kg") { selectedUnit = "kg" }
                 }
 
-                // Center indicator (arrow up & down)
-                Icon(
-                    painter = painterResource(id = R.drawable.dropdown),
-                    contentDescription = null,
-                    modifier = Modifier
-                        .align(Alignment.TopCenter)
-                        .offset(y = 10.dp), // Space from top
-                    tint = Color.Blue
+                Spacer(Modifier.height(150.dp))
+
+                Text(
+                    "$selectedWeight $selectedUnit",
+                    fontSize = 48.sp,
+                    fontWeight = FontWeight.Bold,
+                    color = colorResource(id = R.color.black)
                 )
-                Icon(
-                    painter = painterResource(id = R.drawable.dropup),
-                    contentDescription = null,
+
+                Spacer(Modifier.height(16.dp))
+
+                // Scrollable weight scale
+                // Scrollable weight scale with better spacing
+                Box(
                     modifier = Modifier
-                        .align(Alignment.BottomCenter)
-                        .offset(y = -10.dp), // Space from bottom
-                    tint = Color.Blue
-                )
+                        .fillMaxWidth()
+                        .height(120.dp) // Increased height
+                ) {
+                    LazyRow(
+                        state = scrollState,
+                        contentPadding = PaddingValues(horizontal = 80.dp),
+                        horizontalArrangement = Arrangement.spacedBy(18.dp),
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .align(Alignment.Center)
+                            .padding(vertical = 24.dp) // Add padding to avoid icon collision
+                    ) {
+                        items((minWeight..maxWeight).toList()) { weight ->
+                            Column(horizontalAlignment = Alignment.CenterHorizontally) {
+                                Box(
+                                    modifier = Modifier
+                                        .width(2.dp)
+                                        .height(30.dp)
+                                        .background(Color.Gray)
+                                )
+                                Text("$weight", fontSize = 12.sp)
+                            }
+                        }
+                    }
+
+                    // Center indicator (arrow up & down)
+                    Icon(
+                        painter = painterResource(id = R.drawable.dropdown),
+                        contentDescription = null,
+                        modifier = Modifier
+                            .align(Alignment.TopCenter)
+                            .offset(y = 10.dp), // Space from top
+                        tint = Color.Blue
+                    )
+                    Icon(
+                        painter = painterResource(id = R.drawable.dropup),
+                        contentDescription = null,
+                        modifier = Modifier
+                            .align(Alignment.BottomCenter)
+                            .offset(y = -10.dp), // Space from bottom
+                        tint = Color.Blue
+                    )
+                }
+
+                Spacer(Modifier.height(24.dp))
             }
 
-            Spacer(Modifier.height(24.dp))
-        }
+            Button(
+                onClick = {
 
-        Button(
-            onClick = {
+                    val weightData = mapOf(
+                        SharedPrefManager.WEIGHT to selectedWeight,
+                        SharedPrefManager.WEIGHT_MEASUREMENT to selectedUnit
+                    )
 
-                val weightData = mapOf(
-                    SharedPrefManager.WEIGHT to selectedWeight,
-                    SharedPrefManager.WEIGHT_MEASUREMENT to selectedUnit
+                    saveUserData(weightData, onSuccess = {
+                        Toast.makeText(
+                            navController.context,
+                            "Weight updated successfully!",
+                            Toast.LENGTH_SHORT
+                        ).show()
+                        navController.navigate(ScreensName.HeightPickerScreen.name)
+                    }, onError = {
+                        Toast.makeText(
+                            navController.context,
+                            "Failed to update weight: ${it.message}",
+                            Toast.LENGTH_SHORT
+                        ).show()
+                    })
+                },
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .height(50.dp),
+                colors = ButtonDefaults.buttonColors(containerColor = colorResource(id = R.color.btn_color)),
+                shape = RoundedCornerShape(12.dp)
+            ) {
+                Text("Continue", fontSize = 16.sp)
+
+                Spacer(modifier = Modifier.width(15.dp))
+
+                Image(
+                    painter = painterResource(id = R.drawable.monotone_arrow_right_md),
+                    contentDescription = ""
                 )
-
-                saveUserData(weightData, onSuccess = {
-                    Toast.makeText(
-                        navController.context, "Weight updated successfully!", Toast.LENGTH_SHORT
-                    ).show()
-                    navController.navigate(ScreensName.HeightPickerScreen.name)
-                }, onError = {
-                    Toast.makeText(
-                        navController.context,
-                        "Failed to update weight: ${it.message}",
-                        Toast.LENGTH_SHORT
-                    ).show()
-                })
-            },
-            modifier = Modifier
-                .fillMaxWidth()
-                .height(50.dp),
-            colors = ButtonDefaults.buttonColors(containerColor = colorResource(id = R.color.btn_color)),
-            shape = RoundedCornerShape(12.dp)
-        ) {
-            Text("Continue", fontSize = 16.sp)
-
-            Spacer(modifier = Modifier.width(15.dp))
-
-            Image(
-                painter = painterResource(id = R.drawable.monotone_arrow_right_md),
-                contentDescription = ""
-            )
+            }
         }
     }
 }

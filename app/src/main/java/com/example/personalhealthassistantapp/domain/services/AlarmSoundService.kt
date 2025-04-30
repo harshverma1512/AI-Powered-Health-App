@@ -5,7 +5,9 @@ import android.app.Notification
 import android.app.NotificationChannel
 import android.app.NotificationManager
 import android.app.Service
+import android.content.Context
 import android.content.Intent
+import android.media.AudioManager
 import android.media.MediaPlayer
 import android.media.RingtoneManager
 import android.os.IBinder
@@ -27,7 +29,7 @@ class AlarmSoundService : Service() {
         val channelId = "alarm_sound_channel"
         val channel = NotificationChannel(
             channelId,
-            "Alarm Sound Channel",
+            "Personal Health Alarm Channel",
             NotificationManager.IMPORTANCE_HIGH
         )
         val manager = getSystemService(NotificationManager::class.java)
@@ -42,14 +44,21 @@ class AlarmSoundService : Service() {
 
     private fun playAlarmSound() {
         val alarmUri = RingtoneManager.getDefaultUri(RingtoneManager.TYPE_ALARM)
-        mediaPlayer = MediaPlayer.create(this, alarmUri)
-        mediaPlayer?.apply {
+        val audioManager = getSystemService(Context.AUDIO_SERVICE) as AudioManager
+
+        audioManager.ringerMode = AudioManager.RINGER_MODE_NORMAL
+        val maxVolume = audioManager.getStreamMaxVolume(AudioManager.STREAM_ALARM)
+        audioManager.setStreamVolume(AudioManager.STREAM_ALARM, maxVolume, 0)
+
+        mediaPlayer = MediaPlayer().apply {
+            setAudioStreamType(AudioManager.STREAM_ALARM)
+            setDataSource(this@AlarmSoundService, alarmUri)
             isLooping = true
-            if (!isPlaying) {
-                start()
-            }
+            prepare()
+            start()
         }
     }
+
 
     override fun onDestroy() {
         mediaPlayer?.stop()

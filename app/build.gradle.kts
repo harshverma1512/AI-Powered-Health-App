@@ -84,7 +84,8 @@ dependencies {
     implementation(libs.google.firebase.storage.ktx)
     implementation(libs.firebase.firestore.ktx)
 
-
+    //Worker
+    implementation(libs.androidx.work.runtime.ktx)
 
     //ktor
     implementation(libs.ktor.client.android)
@@ -100,6 +101,7 @@ dependencies {
     kapt(libs.room.compiler)
 
     //coil
+    implementation(libs.coil.network.okhttp)
     implementation(libs.coil.compose)
 
 

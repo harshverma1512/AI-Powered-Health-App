@@ -18,6 +18,7 @@ import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.OutlinedTextField
+import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextFieldColors
 import androidx.compose.runtime.Composable
@@ -44,18 +45,21 @@ import com.example.personalhealthassistantapp.presentation.viewmodel.ChatViewMod
 
 @Composable
 fun ChatBotScreen(navController: NavController,  viewModel: ChatViewModel) {
-    Column(modifier = Modifier
-        .fillMaxWidth()
-        .background(color = colorResource(id = R.color.backgroundColor))
-    ) {
-        ChatBoxHeader()
-        ChatBox(
+    Scaffold { innerPaading ->
+        Column(
             modifier = Modifier
-                .weight(1F),
-            messageList = viewModel.messageList
-        )
-        MessageInput { question ->
-            viewModel.sendMsg(question)
+                .fillMaxWidth().padding(innerPaading)
+                .background(color = colorResource(id = R.color.backgroundColor))
+        ) {
+            ChatBoxHeader()
+            ChatBox(
+                modifier = Modifier
+                    .weight(1F),
+                messageList = viewModel.messageList
+            )
+            MessageInput { question ->
+                viewModel.sendMsg(question)
+            }
         }
     }
 }

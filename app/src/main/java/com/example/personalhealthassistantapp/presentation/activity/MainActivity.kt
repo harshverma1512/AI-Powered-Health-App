@@ -165,7 +165,7 @@ class MainActivity : ComponentActivity() {
 
             }
             composable(ScreensName.NotificationSetting.name){
-                NotificationSetupScreen()
+                NotificationSetupScreen(navController)
             }
             composable(ScreensName.HealthTextAnalysisScreen.name){
                 HealthTextAnalysisScreen(navController , chatViewModel = viewModel)
