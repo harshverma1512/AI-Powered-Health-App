@@ -41,7 +41,7 @@ fun HealthTextAnalysisScreen(navController: NavController, chatViewModel: ChatVi
         ) {
             Column {
                 Text(
-                    text = "Textual AI Health\nAnalysis",
+                    text = "Textual AI Health Analysis",
                     style = MaterialTheme.typography.headlineSmall,
                     fontWeight = FontWeight.Bold
                 )
