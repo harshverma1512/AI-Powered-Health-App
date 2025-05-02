@@ -1,12 +1,14 @@
 package com.example.personalhealthassistantapp.presentation
 
+import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.Image
-import androidx.compose.foundation.background
-import androidx.compose.foundation.border
 import androidx.compose.foundation.layout.*
+import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.Add
+import androidx.compose.material.icons.filled.ArrowForward
+import androidx.compose.material.icons.filled.List
 import androidx.compose.material3.*
 import androidx.compose.material3.AssistChip
 import androidx.compose.material3.AssistChipDefaults
@@ -15,129 +17,169 @@ import androidx.compose.material3.Text
 import androidx.compose.material3.Button
 import androidx.compose.material3.Icon
 import androidx.compose.runtime.*
+import androidx.compose.runtime.snapshots.SnapshotStateList
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.res.colorResource
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.font.FontWeight
-import androidx.compose.ui.tooling.preview.Preview
+import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import androidx.navigation.NavHostController
+import androidx.navigation.NavController
 import com.example.personalhealthassistantapp.R
+import com.example.personalhealthassistantapp.presentation.viewmodel.ChatViewModel
+import com.example.personalhealthassistantapp.utility.Utils
 import com.google.accompanist.flowlayout.FlowRow
 
 @Composable
-fun SymptomsScreen(navController : NavHostController) {
-    var text by remember { mutableStateOf("") }
-    var symptoms by remember { mutableStateOf(listOf("Headache", "Muscle Fatigue")) }
+fun SymptomsInputScreen(navController: NavController , chatViewModel : ChatViewModel) {
+    val symptoms = remember { mutableStateListOf<String>() }
 
-    val maxSymptoms = 5
-
-    Column(
-        modifier = Modifier
-            .fillMaxSize()
-            .background(color = colorResource(id = R.color.backgroundColor)),
-        verticalArrangement = Arrangement.SpaceBetween
-    ) {
-        Column(modifier = Modifier.padding(horizontal = 24.dp)
+    Scaffold {innerPadding ->
+        Column(
+            modifier = Modifier.padding(innerPadding)
+                .fillMaxSize()
+                .verticalScroll(rememberScrollState())
+                .padding(16.dp),
         ) {
-            // Top Bar with progress and Skip
-            WeightToolbar(onBackClick = {
+            Utils.BackBtn {
                 navController.popBackStack()
-            }, onSkipClick = {
-                navController.navigate(ScreensName.HomeScreen.name)
-            })
-            Spacer(modifier = Modifier.height(32.dp))
+            }
+            Column {
 
-            // Title
-            Text(
-                text = "Do you have any\nsymptoms/allergy?",
-                fontSize = 22.sp,
-                fontWeight = FontWeight.Bold,
-                color = Color.Black
-            )
+                Spacer(modifier = Modifier.height(50.dp))
+                Text(
+                    text = "Do you have any\nsymptoms/allergy?",
+                    style = MaterialTheme.typography.headlineSmall,
+                    fontWeight = FontWeight.Bold
+                )
 
-            Spacer(modifier = Modifier.height(24.dp))
+                Spacer(modifier = Modifier.height(24.dp))
+                Image(
+                    painter = painterResource(id = R.drawable.allergyimage),
+                    contentDescription = null,
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .height(180.dp),
+                    contentScale = ContentScale.Fit
+                )
 
-            // Placeholder for image
-            Box(
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .wrapContentHeight()
-                    .background(Color(0xFFEAF1FD), shape = RoundedCornerShape(16.dp)),
-                contentAlignment = Alignment.Center
-            ) {
-                Image(painter = painterResource(id = R.drawable.allergyimage), contentDescription = "")
+                Spacer(modifier = Modifier.height(24.dp))
+
+                // Chip input box
+                SymptomsInputBox(symptoms)
             }
 
-            Spacer(modifier = Modifier.height(24.dp))
-
-            // Symptoms chips & input
-            Column(
+            Button(
+                onClick = {
+                    navController.navigate(ScreensName.HealthTextAnalysisScreen.name).apply {
+                        chatViewModel.setSymptoms(symptoms)
+                    }
+                },
                 modifier = Modifier
                     .fillMaxWidth()
-                    .border(1.dp, Color.Blue, shape = RoundedCornerShape(12.dp))
-                    .padding(12.dp)
+                    .padding(top = 100.dp)
+                    .height(56.dp),
+                colors = ButtonDefaults.buttonColors(containerColor = colorResource(R.color.btn_color)),
+                shape = RoundedCornerShape(12.dp)
             ) {
+                Text("Continue")
+                Spacer(modifier = Modifier.width(8.dp))
+                Icon(Icons.Default.ArrowForward, contentDescription = null)
+            }
+        }
+    }
+}
+
+    @Composable
+    fun SymptomsInputBox(symptoms: SnapshotStateList<String>) {
+        var currentSymptom by remember { mutableStateOf("") }
+        val maxSymptoms = 10
+
+        Card(
+            border = BorderStroke(2.dp, Color(0xFF3E80FF)),
+            shape = RoundedCornerShape(16.dp),
+            modifier = Modifier
+                .fillMaxWidth()
+                .padding(16.dp),
+            colors = CardDefaults.cardColors(
+                containerColor = Color(0xFFF7FAFF)
+            )
+        ) {
+            Column(modifier = Modifier.padding(12.dp)) {
                 FlowRow(
-                    mainAxisSpacing = 8.dp,
-                    crossAxisSpacing = 8.dp
+                    mainAxisSpacing = 8.dp, crossAxisSpacing = 8.dp
                 ) {
                     symptoms.forEach { symptom ->
                         AssistChip(
-                            onClick = { /* Maybe remove later */ },
-                            label = { Text(symptom) },
-                            colors = AssistChipDefaults.assistChipColors(containerColor = Color(0xFFE5F0FF))
+                            onClick = { symptoms.remove(symptom) }, // Remove on click
+                            label = {
+                                Text(
+                                    text = symptom,
+                                    color = Color(0xFF3E80FF),
+                                    fontWeight = FontWeight.Medium,
+                                    maxLines = 1,
+                                    overflow = TextOverflow.Ellipsis // optional if text too long
+                                )
+                            },
+                            colors = AssistChipDefaults.assistChipColors(
+                                containerColor = Color(0xFFDDEBFF)
+                            ),
+                            modifier = Modifier
+                                .defaultMinSize(minHeight = 32.dp)
+                                .padding(horizontal = 2.dp) // add padding between chips
                         )
                     }
 
                     if (symptoms.size < maxSymptoms) {
                         OutlinedTextField(
-                            value = text,
-                            onValueChange = {
-                                text = it
-                                if (it.endsWith(" ")) {
-                                    val trimmed = it.trim()
-                                    if (trimmed.isNotEmpty() && !symptoms.contains(trimmed)) {
-                                        symptoms = symptoms + trimmed
+                            value = currentSymptom,
+                            onValueChange = { newText ->
+                                if (newText.endsWith(" ") || newText.endsWith("\n")) {
+                                    if (currentSymptom.isNotBlank()) {
+                                        symptoms.add(currentSymptom.trim())
                                     }
-                                    text = ""
+                                    currentSymptom = ""
+                                } else {
+                                    currentSymptom = newText
                                 }
                             },
-                            placeholder = { Text("Add symptom...") },
-                            modifier = Modifier.fillMaxWidth(),
+                            placeholder = { Text("Type symptom") },
+                            modifier = Modifier
+                                .widthIn(min = 80.dp, max = 200.dp)
+                                .padding(4.dp)
+                                .defaultMinSize(minHeight = 40.dp),
                             singleLine = true,
                             colors = OutlinedTextFieldDefaults.colors(
                                 unfocusedBorderColor = Color.Transparent,
                                 focusedBorderColor = Color.Transparent
-                            )
+                            ),
+                            textStyle = LocalTextStyle.current.copy(color = Color.Black)
                         )
                     }
                 }
 
                 Spacer(modifier = Modifier.height(8.dp))
 
-                Text(
-                    text = "${symptoms.size}/$maxSymptoms",
-                    modifier = Modifier.align(Alignment.End),
-                    color = Color.Gray
-                )
-            }
-                    Spacer(modifier = Modifier.height(100.dp))
-            Button(
-                onClick = { /* Handle click */ },
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .height(56.dp),
-                shape = RoundedCornerShape(12.dp), colors = ButtonDefaults.buttonColors(
-                    colorResource(id = R.color.btn_color))
-            ) {
-                Text("Continue")
-                Spacer(modifier = Modifier.width(10.dp))
-                Image(painter = painterResource(id = R.drawable.monotone_arrow_right_md), contentDescription = "")
+                Row(
+                    modifier = Modifier.fillMaxWidth(),
+                    horizontalArrangement = Arrangement.End,
+                    verticalAlignment = Alignment.CenterVertically
+                ) {
+                    Icon(
+                        imageVector = Icons.Default.List,
+                        contentDescription = null,
+                        tint = Color.Gray,
+                        modifier = Modifier.size(16.dp)
+                    )
+                    Spacer(modifier = Modifier.width(4.dp))
+                    Text(
+                        text = "${symptoms.size}/$maxSymptoms", color = Color.Gray, fontSize = 12.sp
+                    )
+                }
             }
         }
     }
-}

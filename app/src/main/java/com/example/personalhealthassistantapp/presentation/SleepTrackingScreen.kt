@@ -1,10 +1,7 @@
 package com.example.personalhealthassistantapp.presentation
 
 import android.os.Build
-import androidx.activity.compose.BackHandler
 import androidx.annotation.RequiresApi
-import androidx.collection.mutableObjectIntMapOf
-import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
@@ -30,7 +27,6 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.font.FontWeight
-import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.example.personalhealthassistantapp.R
@@ -38,21 +34,14 @@ import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.verticalScroll
-import androidx.compose.material.icons.filled.ArrowDropDown
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.draw.clip
-import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.colorResource
-import androidx.compose.ui.text.TextPainter.paint
-import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.navigation.NavController
 import com.example.personalhealthassistantapp.data.model.SleepHistoryModel
-import com.example.personalhealthassistantapp.presentation.viewmodel.ChatViewModel
 import com.example.personalhealthassistantapp.presentation.viewmodel.DataBaseViewModel
 import com.example.personalhealthassistantapp.utility.Utils
-import dagger.hilt.android.lifecycle.HiltViewModel
-import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.launch
 import java.time.LocalDate
 import java.time.YearMonth
@@ -60,96 +49,89 @@ import java.time.format.DateTimeFormatter
 import java.time.format.TextStyle
 import java.util.*
 
-
 @OptIn(ExperimentalMaterial3Api::class)
-@RequiresApi(Build.VERSION_CODES.O)
 @Composable
-fun SleepTrackingScreen(navigation: NavController, dataBaseViewModel : DataBaseViewModel) {
+fun SleepTrackingScreen(navigation: NavController, dataBaseViewModel: DataBaseViewModel) {
     val sheetState = rememberModalBottomSheetState(skipPartiallyExpanded = true)
     var showSheet by remember { mutableStateOf(false) }
     var currentDate by remember { mutableStateOf(LocalDate.now()) }
     val context = rememberCoroutineScope()
 
-    if (showSheet) {
-        ModalBottomSheet(
-            onDismissRequest = { showSheet = false },
-            sheetState = sheetState
-        ) {
-            FilterSleepSheetContent(
-                onDismiss = { timeDuration ->
-                    context.launch {
-                        dataBaseViewModel.insertSleepHistory(
-                            SleepHistoryModel(
-                                sleepDuration = timeDuration,
-                                sleepType = "Normal",
-                                sleepDate = currentDate.format(DateTimeFormatter.ofPattern("dd/MM/yyyy")),
-                                sleepStatus = "ok"
+    Scaffold { innerPadding ->
+        if (showSheet) {
+            ModalBottomSheet(
+                onDismissRequest = { showSheet = false }, sheetState = sheetState
+            ) {
+                FilterSleepSheetContent(
+                    onDismiss = { sleepModel ->
+                        context.launch {
+                            dataBaseViewModel.insertSleepHistory(
+                                sleepModel
                             )
-                        )
-                    }
-                    showSheet = false
-                },
-                dataBaseViewModel = dataBaseViewModel
-            )
-        }
-    }
-
-    Box(modifier = Modifier.fillMaxSize()) {
-        Column(
-            modifier = Modifier
-                .fillMaxSize()
-                .verticalScroll(rememberScrollState())
-                .background(Color(0xFFF7F9FC))
-                .padding(16.dp)
-        ) {
-            Utils.BackBtn { navigation.popBackStack() }
-            NativeCalendar{
-                currentDate = it
+                        }
+                        showSheet = false
+                    },
+                )
             }
-            Spacer(modifier = Modifier.height(16.dp))
-            SleepOverviewCard()
-            Spacer(modifier = Modifier.height(16.dp))
-            SleepHistorySection()
-            Spacer(modifier = Modifier.height(80.dp)) // for FAB spacing
         }
 
-        FloatingActionButton(
-            onClick = { showSheet = true },
-            containerColor = Color(0xFF3B82F6),
-            shape = RoundedCornerShape(12.dp),
-            modifier = Modifier
-                .align(Alignment.BottomCenter)
-                .padding(bottom = 16.dp)
-                .size(56.dp)
-        ) {
-            Icon(Icons.Default.Add, contentDescription = "Add", tint = Color.White)
+        Box(modifier = Modifier
+            .fillMaxSize()
+            .padding(innerPadding)) {
+            Column(
+                modifier = Modifier
+                    .fillMaxSize()
+                    .verticalScroll(rememberScrollState())
+                    .background(Color(0xFFF7F9FC))
+                    .padding(16.dp)
+            ) {
+                Utils.BackBtn { navigation.popBackStack() }
+                NativeCalendar {
+                    currentDate = it
+                }
+                Spacer(modifier = Modifier.height(16.dp))
+                SleepOverviewCard()
+                Spacer(modifier = Modifier.height(16.dp))
+                SleepHistorySection(dataBaseViewModel)
+                Spacer(modifier = Modifier.height(80.dp)) // for FAB spacing
+            }
+
+            FloatingActionButton(
+                onClick = { showSheet = true },
+                containerColor = Color(0xFF3B82F6),
+                shape = RoundedCornerShape(12.dp),
+                modifier = Modifier
+                    .align(Alignment.BottomCenter)
+                    .padding(bottom = 16.dp)
+                    .size(56.dp)
+            ) {
+                Icon(Icons.Default.Add, contentDescription = "Add", tint = Color.White)
+            }
         }
     }
 }
 
-
 @Composable
-fun SleepHistorySection() {
+fun SleepHistorySection(dataBaseViewModel: DataBaseViewModel) {
+    var sleepHistory by remember { mutableStateOf<List<SleepHistoryModel>>(emptyList()) }
+
+    LaunchedEffect(Unit) {
+        sleepHistory = dataBaseViewModel.getAllSleepHistory()
+    }
+
     Column {
         Text("Sleep History", fontWeight = FontWeight.Bold, fontSize = 18.sp)
         Spacer(modifier = Modifier.height(8.dp))
 
-        val sampleHistory = listOf(
-            "You slept for 4.2h" to "Too short",
-            "You slept for 7.8h" to "Recommended",
-            "You slept for 5.1h" to "OK",
-            "You slept for 6.2h" to "Average"
-        )
-
-        sampleHistory.forEachIndexed { index, item ->
-            SleepHistoryCard(day = 27 - index, text = item.first, tag = item.second)
-            Spacer(modifier = Modifier.height(8.dp))
+        sleepHistory.forEach {
+            SleepHistoryCard(it)
         }
     }
 }
 
 @Composable
-fun SleepHistoryCard(day: Int, text: String, tag: String) {
+fun SleepHistoryCard(sleepHistoryModel: SleepHistoryModel) {
+    Spacer(modifier = Modifier.height(10.dp))
     Card(
         shape = RoundedCornerShape(12.dp),
         modifier = Modifier.fillMaxWidth(),
@@ -163,19 +145,24 @@ fun SleepHistoryCard(day: Int, text: String, tag: String) {
             horizontalArrangement = Arrangement.SpaceBetween
         ) {
             Column {
-                Text("July $day", fontWeight = FontWeight.SemiBold, color = Color.Gray)
-                Text(text, fontWeight = FontWeight.Bold)
+                Text(
+                    "${sleepHistoryModel.sleepDate}",
+                    fontWeight = FontWeight.SemiBold,
+                    color = Color.Gray
+                )
+                Text("Sleeping Hours ${sleepHistoryModel.sleepDuration}  $sleepHistoryModel.", fontWeight = FontWeight.Bold)
+                Text("Sleeping Hours ${sleepHistoryModel.sleepDuration}  $sleepHistoryModel.", fontWeight = FontWeight.Bold)
             }
-            Text(
-                tag,
-                color = when (tag) {
-                    "Too short" -> Color.Red
-                    "Recommended" -> Color(0xFF10B981)
-                    "OK" -> Color(0xFF6366F1)
-                    else -> Color.Gray
-                },
-                fontWeight = FontWeight.SemiBold
-            )
+            sleepHistoryModel.sleepType?.let {
+                Text(
+                    it, color = when (it) {
+                        "Too short" -> Color.Red
+                        "Recommended" -> Color(0xFF10B981)
+                        "OK" -> Color(0xFF6366F1)
+                        else -> Color.Gray
+                    }, fontWeight = FontWeight.SemiBold
+                )
+            }
         }
     }
 }
@@ -188,8 +175,7 @@ fun SleepOverviewCard() {
         modifier = Modifier.fillMaxWidth()
     ) {
         Row(
-            modifier = Modifier.padding(16.dp),
-            verticalAlignment = Alignment.CenterVertically
+            modifier = Modifier.padding(16.dp), verticalAlignment = Alignment.CenterVertically
         ) {
             Column(modifier = Modifier.weight(1f)) {
                 Text("Sleep Overview", color = Color.White)
@@ -198,9 +184,7 @@ fun SleepOverviewCard() {
             }
             Icon(
                 painter = painterResource(id = R.drawable.night), // Add moon/star image
-                contentDescription = null,
-                tint = Color.White,
-                modifier = Modifier.size(100.dp)
+                contentDescription = null, tint = Color.White, modifier = Modifier.size(100.dp)
             )
         }
     }
@@ -208,7 +192,7 @@ fun SleepOverviewCard() {
 
 @RequiresApi(Build.VERSION_CODES.O)
 @Composable
-fun NativeCalendar(selectionDate : (LocalDate) -> Unit) {
+fun NativeCalendar(selectionDate: (LocalDate) -> Unit) {
     var selectedDate by remember { mutableStateOf(LocalDate.now()) }
     var currentMonth by remember { mutableStateOf(YearMonth.now()) }
 
@@ -225,9 +209,11 @@ fun NativeCalendar(selectionDate : (LocalDate) -> Unit) {
             verticalAlignment = Alignment.CenterVertically
         ) {
             Text(
-                "${currentMonth.month.getDisplayName(TextStyle.FULL, Locale.getDefault())} ${currentMonth.year}",
-                fontSize = 20.sp,
-                fontWeight = FontWeight.Bold
+                "${
+                    currentMonth.month.getDisplayName(
+                        TextStyle.FULL, Locale.getDefault()
+                    )
+                } ${currentMonth.year}", fontSize = 20.sp, fontWeight = FontWeight.Bold
             )
             Row {
                 TextButton(onClick = { currentMonth = currentMonth.minusMonths(1) }) {
@@ -261,8 +247,7 @@ fun NativeCalendar(selectionDate : (LocalDate) -> Unit) {
         val rows = (totalCells / 7) + if (totalCells % 7 != 0) 1 else 0
 
         Column(
-            modifier = Modifier.fillMaxWidth(),
-            verticalArrangement = Arrangement.spacedBy(4.dp)
+            modifier = Modifier.fillMaxWidth(), verticalArrangement = Arrangement.spacedBy(4.dp)
         ) {
             repeat(rows) { row ->
                 Row(
@@ -271,9 +256,10 @@ fun NativeCalendar(selectionDate : (LocalDate) -> Unit) {
                 ) {
                     for (column in 0..6) {
                         val cellIndex = row * 7 + column
-                        val date = if (cellIndex >= firstDayOfWeek && cellIndex - firstDayOfWeek < days.size) {
-                            days[cellIndex - firstDayOfWeek]
-                        } else null
+                        val date =
+                            if (cellIndex >= firstDayOfWeek && cellIndex - firstDayOfWeek < days.size) {
+                                days[cellIndex - firstDayOfWeek]
+                            } else null
 
                         Box(
                             modifier = Modifier
@@ -289,8 +275,7 @@ fun NativeCalendar(selectionDate : (LocalDate) -> Unit) {
                                 .clickable(enabled = date != null) {
                                     selectedDate = date!!
                                     selectionDate.invoke(date)
-                                },
-                            contentAlignment = Alignment.Center
+                                }, contentAlignment = Alignment.Center
                         ) {
                             Text(
                                 text = date?.dayOfMonth?.toString() ?: "",
@@ -306,8 +291,7 @@ fun NativeCalendar(selectionDate : (LocalDate) -> Unit) {
 
         // Legend
         Row(
-            modifier = Modifier.fillMaxWidth(),
-            horizontalArrangement = Arrangement.SpaceBetween
+            modifier = Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.SpaceBetween
         ) {
             LegendItem(color = colorResource(R.color.app_bar_color), label = "Normal")
             LegendItem(color = colorResource(R.color.light_red), label = "Insomniac")
@@ -332,86 +316,5 @@ fun LegendItem(color: Color, label: String) {
             fontWeight = FontWeight.Bold,
             modifier = Modifier.padding(start = 4.dp)
         )
-    }
-}
-
-
-@Composable
-fun FilterSleepSheetContent(onDismiss: (Int) -> Unit , dataBaseViewModel : DataBaseViewModel) {
-
-    val timeDuration = remember { mutableIntStateOf(5) }
-
-    Column(
-        modifier = Modifier
-            .fillMaxWidth()
-            .padding(16.dp)
-    ) {
-        Text("Filter Sleep", fontWeight = FontWeight.Bold, fontSize = 20.sp)
-        Spacer(modifier = Modifier.height(16.dp))
-
-        Row(horizontalArrangement = Arrangement.SpaceBetween, modifier = Modifier.fillMaxWidth()) {
-            OutlinedTextField(value = "20/15/2052", onValueChange = {}, label = { Text("From") }, modifier = Modifier.weight(1f), leadingIcon = {
-                Image(painterResource(R.drawable.calendar), contentDescription = null, modifier = Modifier.size(18.dp))
-            })
-            Spacer(modifier = Modifier.width(8.dp))
-            OutlinedTextField(value = "20/15/2052", onValueChange = {}, label = { Text("To") }, modifier = Modifier.weight(1f), leadingIcon = {
-                Image(painterResource(R.drawable.calendar), contentDescription = null, modifier = Modifier.size(18.dp))
-            })
-        }
-
-        Spacer(modifier = Modifier.height(16.dp))
-
-        Text("Sleep Duration", fontWeight = FontWeight.Bold, color = Color.Black)
-        Slider(
-            value = timeDuration.intValue.toFloat(),
-            onValueChange = {timeDuration.intValue = it.toInt()},
-            valueRange = 0f..12f,
-            steps = 11, colors = SliderDefaults.colors(
-                thumbColor = colorResource(R.color.btn_color),        // Thumb knob
-                activeTrackColor = colorResource(R.color.btn_color),  // Filled track
-                inactiveTrackColor = Color.LightGray,  // Empty track
-                activeTickColor = Color.White,
-                inactiveTickColor = Color.Gray
-            )
-        )
-
-        Spacer(modifier = Modifier.height(16.dp))
-
-        Text("Sleep Type", fontWeight = FontWeight.Bold , color = Color.Black)
-
-        Row(
-            horizontalArrangement = Arrangement.SpaceEvenly,
-            modifier = Modifier
-                .fillMaxWidth()
-                .padding(top = 8.dp)
-        ) {
-            SleepTag("Normal", Color.LightGray)
-            SleepTag("Post REM", colorResource(R.color.btn_color))
-            SleepTag("Power Nap", Color.LightGray)
-        }
-
-        Spacer(modifier = Modifier.height(24.dp))
-
-        Button(
-            onClick = {
-                    onDismiss(timeDuration.intValue)
-            },
-            modifier = Modifier.fillMaxWidth(),
-            colors = ButtonDefaults.buttonColors(containerColor = colorResource(R.color.btn_color))
-        ) {
-            Text("Hour Sleep (${timeDuration.intValue})", color = Color.White)
-        }
-    }
-}
-
-@Composable
-fun SleepTag(text: String, background: Color) {
-    Box(
-        modifier = Modifier
-            .clip(RoundedCornerShape(12.dp))
-            .background(background)
-            .padding(horizontal = 12.dp, vertical = 8.dp)
-    ) {
-        Text(text = text, color = Color.White)
     }
 }

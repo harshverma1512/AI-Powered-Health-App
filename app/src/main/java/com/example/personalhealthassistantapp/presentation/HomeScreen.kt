@@ -1,5 +1,6 @@
 package com.example.personalhealthassistantapp.presentation
 
+import android.annotation.SuppressLint
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
@@ -12,45 +13,68 @@ import androidx.compose.material.icons.filled.Notifications
 import androidx.compose.material.icons.filled.Search
 import androidx.compose.material3.*
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.*
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.layout.ContentScale
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.colorResource
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.font.FontWeight
-import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.navigation.NavController
-import androidx.navigation.NavHostController
+import coil3.compose.AsyncImage
 import com.example.personalhealthassistantapp.R
+import com.example.personalhealthassistantapp.presentation.viewmodel.ChatViewModel
+import com.example.personalhealthassistantapp.utility.SharedPrefManager
+import com.example.personalhealthassistantapp.utility.Utils.getGreeting
+import com.google.firebase.auth.FirebaseAuth
+import kotlin.random.Random
 
+@SuppressLint("StateFlowValueCalledInComposition")
 @Composable
-fun HomeScreen(navController: NavController) {
-     Column(
-        modifier = Modifier
-            .fillMaxSize()
-            .background(color = colorResource(id = R.color.backgroundColor))
-    ) {
-        LazyColumn(
+fun HomeScreen(navController: NavController,  chatViewModel: ChatViewModel) {
+
+    LaunchedEffect(Unit) {
+        chatViewModel.getUserData()
+    }
+
+    Scaffold {innerPadding ->
+        val score = chatViewModel.score
+
+        Column(
             modifier = Modifier
-                .fillMaxSize() ,contentPadding = PaddingValues(16.dp),
-            verticalArrangement = Arrangement.spacedBy(16.dp)
+                .fillMaxSize()
+                .background(color = colorResource(id = R.color.backgroundColor))
         ) {
-            item { TopBarSection(navController) }
-            item { HealthScoreSection(navController) }
-            item { VitalsSection(navController) }
-            item { FitnessTrackerSection(navController) }
-            item { WellnessChatbotSection(navController) }
-            item { MedicationSection(navController) }
+            LazyColumn(
+                modifier = Modifier
+                    .padding(innerPadding)
+                    .fillMaxSize(), contentPadding = PaddingValues(16.dp),
+                verticalArrangement = Arrangement.spacedBy(16.dp)
+            ) {
+                item { TopBarSection(navController) }
+                item { HealthScoreSection(score) }
+                item { VitalsSection(navController) }
+                item { FitnessTrackerSection(navController) }
+                item { WellnessChatbotSection(navController) }
+                item { AllergySymptomsSection(navController) }
+             //   item { MedicationSection(navController) }
+            }
         }
     }
 }
 
 @Composable
 fun TopBarSection(navController: NavController) {
+    val user = FirebaseAuth.getInstance().currentUser
+    val displayName = user?.displayName ?: "User"
+    val photoUrl = user?.photoUrl
+
     Column {
         Row(
             verticalAlignment = Alignment.CenterVertically,
@@ -58,17 +82,29 @@ fun TopBarSection(navController: NavController) {
             modifier = Modifier.fillMaxWidth()
         ) {
             Row(verticalAlignment = Alignment.CenterVertically) {
-                Box(modifier = Modifier
-                    .clickable {
-                        navController.navigate(ScreensName.ProfileScreen.name)
+                Box(
+                    modifier = Modifier
+                        .clickable {
+                            navController.navigate(ScreensName.ProfileScreen.name)
+                        }
+                        .size(48.dp)
+                        .clip(CircleShape)
+                        .background(Color.Gray)
+                ) {
+                    photoUrl?.let {
+                        AsyncImage(
+                            model = it,
+                            contentDescription = "Profile Image",
+                            modifier = Modifier
+                                .fillMaxSize()
+                                .clip(CircleShape)
+                        )
                     }
-                    .size(48.dp)
-                    .clip(CircleShape)
-                    .background(Color.Gray))
+                }
                 Spacer(modifier = Modifier.width(8.dp))
                 Column {
-                    Text("Hi, Harsh! 👋", fontWeight = FontWeight.Bold)
-                    Text("Good morning 🌞", style = MaterialTheme.typography.bodySmall)
+                    Text("Hi, $displayName! 👋", fontWeight = FontWeight.Bold)
+                    Text(getGreeting(), style = MaterialTheme.typography.bodySmall)
                 }
             }
             Icon(Icons.Default.Notifications, contentDescription = null, modifier = Modifier.clickable {
@@ -89,21 +125,88 @@ fun TopBarSection(navController: NavController) {
     }
 }
 
+
 @Composable
-fun HealthScoreSection(navController: NavController) {
-    Card(
-        modifier = Modifier.fillMaxWidth(),
-        colors = CardDefaults.cardColors(containerColor = Color.White),
-        shape = RoundedCornerShape(16.dp)
-    ) {
-        Column(modifier = Modifier.padding(16.dp)) {
-            Text("Health Score", fontWeight = FontWeight.Bold)
-            Spacer(modifier = Modifier.height(8.dp))
-            Text("88", fontSize = 32.sp, color = Color(0xFF6C63FF), fontWeight = FontWeight.Bold)
-            Text("Awesome! Keep it up.")
+fun HealthScoreSection(score : Int?) {
+    val randomColor = remember {
+        Color(
+            red = Random.nextFloat(),
+            green = Random.nextFloat(),
+            blue = Random.nextFloat(),
+            alpha = 1f
+        )
+    }
+
+    Card(modifier = Modifier
+        .fillMaxWidth()
+        .wrapContentHeight(),
+        shape = RoundedCornerShape(16.dp),
+        elevation = CardDefaults.cardElevation(defaultElevation = 4.dp),
+        colors = CardDefaults.cardColors(containerColor = Color(0xFFF7F9FC))) {
+        Row(
+            modifier = Modifier
+                .clip(RoundedCornerShape(16.dp))
+                .background(Color(0xFFF5F7FA))
+                .padding(16.dp),
+            verticalAlignment = Alignment.CenterVertically
+        ) {
+            // Score box with loading state
+            Box(
+                modifier = Modifier
+                    .size(64.dp)
+                    .clip(RoundedCornerShape(16.dp))
+                    .background(randomColor),
+                contentAlignment = Alignment.Center
+            ) {
+                if (score != null) {
+                    Text(
+                        text = score.toString(),
+                        fontSize = 22.sp,
+                        fontWeight = FontWeight.Bold,
+                        color = Color.White
+                    )
+                } else {
+                    CircularProgressIndicator(
+                        color = Color.White,
+                        strokeWidth = 3.dp,
+                        modifier = Modifier.size(24.dp)
+                    )
+                }
+            }
+
+            Spacer(modifier = Modifier.width(16.dp))
+
+            Column {
+                Text(
+                    text = "Health Score",
+                    fontSize = 16.sp,
+                    fontWeight = FontWeight.Bold,
+                    color = Color(0xFF1E1E1E)
+                )
+                Text(
+                    text = getBMIStatusMessage(score?.toDouble() ?: 0.0),
+                    fontSize = 14.sp,
+                    color = Color.Gray
+                )
+            }
         }
     }
 }
+
+
+fun getBMIStatusMessage(bmi: Double): String {
+    return when {
+        bmi < 16.0 -> "Severely underweight – please consult a healthcare provider."
+        bmi < 17.0 -> "Moderately underweight – consider improving your nutrition."
+        bmi < 18.5 -> "Mildly underweight – a slight weight gain may be beneficial."
+        bmi < 25.0 -> "You are in the healthy weight range – keep up the good lifestyle!"
+        bmi < 30.0 -> "You are overweight – consider adopting a more active routine."
+        bmi < 35.0 -> "Obese Class I – managing diet and exercise is recommended."
+        bmi < 40.0 -> "Obese Class II – seek guidance for healthy weight loss."
+        else       -> "Obese Class III – urgent medical advice is highly recommended."
+    }
+}
+
 
 @Composable
 fun VitalsSection(navController: NavController) {
@@ -163,6 +266,7 @@ fun StepsTakenCard(
 ) {
     Card(
         modifier = Modifier
+            .clickable { navController.navigate(ScreensName.MedicationManagement.name) }
             .fillMaxWidth()
             .height(80.dp),
         shape = RoundedCornerShape(16.dp),
@@ -216,14 +320,16 @@ fun StepsTakenCard(
 
 @Composable
 fun HydrationCard(
-    currentMl: Int = 900,
-    goalMl: Int = 2000,
+    currentMl: Int = SharedPrefManager(context = LocalContext.current).getWaterTake(),
+    goalMl: Int = SharedPrefManager(context = LocalContext.current).getWaterGoal(),
+    unit: String = SharedPrefManager(context = LocalContext.current).getWaterUnit(),
     navController: NavController
 ) {
-    val progress = currentMl.toFloat() / goalMl
+    val progress = currentMl.toFloat() / convertToMilliliters(goalMl.toFloat(), unit)
 
     Card(
         modifier = Modifier
+            .clickable { navController.navigate(ScreensName.HydrationScreen.name) }
             .fillMaxWidth()
             .height(80.dp),
         shape = RoundedCornerShape(16.dp),
@@ -245,7 +351,7 @@ fun HydrationCard(
                     contentAlignment = Alignment.Center
                 ) {
                     Icon(
-                        painter = painterResource(id = R.drawable.drop), // Replace with your drop icon
+                        painter = painterResource(id = R.drawable.drop),
                         contentDescription = "Hydration",
                         tint = Color(0xFF7D8FAB),
                         modifier = Modifier.size(26.dp)
@@ -254,7 +360,9 @@ fun HydrationCard(
 
                 Spacer(modifier = Modifier.width(12.dp))
 
-                Column {
+                Column(
+                    modifier = Modifier.fillMaxWidth()
+                ) {
                     Text(
                         text = "Hydration",
                         style = MaterialTheme.typography.titleMedium.copy(
@@ -265,7 +373,7 @@ fun HydrationCard(
 
                     Spacer(modifier = Modifier.height(4.dp))
 
-                    // Progress bar composed of segments
+                    // Progress bar
                     Row(horizontalArrangement = Arrangement.spacedBy(4.dp)) {
                         repeat(8) { index ->
                             Box(
@@ -273,9 +381,8 @@ fun HydrationCard(
                                     .height(6.dp)
                                     .weight(1f)
                                     .background(
-                                        if (index < (progress * 8).toInt()) Color(0xFF2563EB) // Blue
-                                        else Color(0xFFE5E7EB), // Light grey
-                                        shape = RoundedCornerShape(50)
+                                        if (index < (progress * 8).toInt()) Color(0xFF2563EB)
+                                        else Color(0xFFE5E7EB), shape = RoundedCornerShape(50)
                                     )
                             )
                         }
@@ -283,17 +390,18 @@ fun HydrationCard(
 
                     Spacer(modifier = Modifier.height(4.dp))
 
+                    // Progress texts
                     Row(
                         horizontalArrangement = Arrangement.SpaceBetween,
                         modifier = Modifier.fillMaxWidth()
                     ) {
                         Text(
-                            text = "${currentMl}ml",
+                            text = "$currentMl $unit", // 🆕 show current value with unit
                             style = MaterialTheme.typography.bodySmall,
                             color = Color(0xFF9CA3AF)
                         )
                         Text(
-                            text = "${goalMl}ml",
+                            text = "$goalMl $unit", // 🆕 show goal value with unit
                             style = MaterialTheme.typography.bodySmall,
                             color = Color(0xFF9CA3AF)
                         )
@@ -303,6 +411,7 @@ fun HydrationCard(
         }
     }
 }
+
 
 
 @Composable
@@ -400,10 +509,42 @@ fun WellnessChatbotSection(navController: NavController) {
 }
 
 @Composable
+fun AllergySymptomsSection(navController: NavController) {
+    Card(
+        shape = RoundedCornerShape(16.dp),
+        modifier = Modifier
+            .clickable { navController.navigate(ScreensName.SymptomsInputScreen.name) }
+            .wrapContentWidth()
+            .wrapContentHeight(), // Optional: control height
+        elevation = CardDefaults.cardElevation(defaultElevation = 4.dp),
+    ) {
+        Box(modifier = Modifier
+            .wrapContentWidth()
+            .height(170.dp)){
+            Image(
+                painter = painterResource(id = R.drawable.allergyimage),
+                contentDescription = null,
+                contentScale = ContentScale.FillWidth,
+                modifier = Modifier
+                    .fillMaxSize(),
+            )
+            Image(painter = painterResource(id = R.drawable.health_plus), contentDescription = "Health Plus Logo", modifier = Modifier
+                .align(Alignment.BottomEnd)
+                .size(70.dp)
+                .padding(bottom = 20.dp, end = 20.dp))
+        }
+    }
+}
+
+@Composable
 fun MedicationSection(navController: NavController) {
     Card(
         shape = RoundedCornerShape(16.dp),
-        modifier = Modifier.fillMaxWidth(),
+        modifier = Modifier
+            .fillMaxWidth()
+            .clickable {
+                navController.navigate(ScreensName.SymptomsInputScreen.name)
+            },
         colors = CardDefaults.cardColors(containerColor = Color.White)
     ) {
         Column(modifier = Modifier.padding(16.dp)) {

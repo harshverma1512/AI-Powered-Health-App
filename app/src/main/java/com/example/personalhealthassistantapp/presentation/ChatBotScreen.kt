@@ -4,7 +4,6 @@ import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
-import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
@@ -15,10 +14,9 @@ import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Send
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
-import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.OutlinedTextField
+import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
-import androidx.compose.material3.TextFieldColors
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
@@ -29,8 +27,6 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalSoftwareKeyboardController
 import androidx.compose.ui.res.colorResource
-import androidx.compose.ui.text.TextStyle
-import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.navigation.NavController
@@ -39,22 +35,25 @@ import com.example.personalhealthassistantapp.data.model.MessageModel
 import com.example.personalhealthassistantapp.presentation.ui.bot
 import com.example.personalhealthassistantapp.presentation.ui.user
 import com.example.personalhealthassistantapp.presentation.viewmodel.ChatViewModel
-
+import com.example.personalhealthassistantapp.utility.Utils
 
 @Composable
 fun ChatBotScreen(navController: NavController,  viewModel: ChatViewModel) {
-    Column(modifier = Modifier
-        .fillMaxWidth()
-        .background(color = colorResource(id = R.color.backgroundColor))
-    ) {
-        ChatBoxHeader()
-        ChatBox(
+    Scaffold { innerPadding ->
+        Column(
             modifier = Modifier
-                .weight(1F),
-            messageList = viewModel.messageList
-        )
-        MessageInput { question ->
-            viewModel.sendMsg(question)
+                .fillMaxWidth().padding(innerPadding)
+                .background(color = colorResource(id = R.color.backgroundColor))
+        ) {
+            ChatBoxHeader(navController = navController)
+            ChatBox(
+                modifier = Modifier
+                    .weight(1F),
+                messageList = viewModel.messageList
+            )
+            MessageInput { question ->
+                viewModel.sendMsg(question)
+            }
         }
     }
 }
@@ -129,13 +128,16 @@ fun MessageInput(sendMessage: (String) -> Unit) {
 
 
 @Composable
-fun ChatBoxHeader(modifier: Modifier = Modifier) {
+fun ChatBoxHeader(modifier: Modifier = Modifier, navController: NavController) {
     Box(
         modifier
             .fillMaxWidth()
             .background(color = colorResource(id = R.color.btn_color)),
         contentAlignment = Alignment.CenterStart
     ) {
+        Utils.BackBtn {
+            navController.popBackStack()
+        }
 
         Text(
             text = "Your Assistance",

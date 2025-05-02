@@ -1,13 +1,13 @@
 [versions]
 accompanistFlowlayout = "0.30.1"
-agp = "8.5.2"
+agp = "8.5.1"
+coilNetworkOkhttp = "3.1.0"
+coilCompose = "3.1.0"
 compiler = "1.5.15"
-coroutinesVersion = "1.8.0"
+coroutinesVersion = "1.9.0"
+firebaseBom = "33.12.0"
 generativeai = "0.9.0"
-kalendar = "1.2.2"
-koinVersion = "3.5.3"
 kotlin = "2.0.0"
-coreKtx = "1.15.0"
 junit = "4.13.2"
 hiltNavigationCompose = "1.2.0"
 junitVersion = "1.2.1"
@@ -17,7 +17,8 @@ ktorVersion = "2.3.2"
 lifecycleRuntimeKtx = "2.8.7"
 hiltAndroid = "2.51.1"
 activityCompose = "1.10.1"
-composeBom = "2025.03.00"
+composeBom = "2025.04.00"
+playServicesAuth = "21.3.0"
 retrofit2KotlinCoroutinesAdapter = "0.9.2"
 googleGmsGoogleServices = "4.4.2"
 firebaseAuth = "23.2.0"
@@ -25,15 +26,23 @@ roomCompilerVersion = "2.7.0"
 roomKtx = "2.7.0"
 roomPaging = "2.7.0"
 roomRuntime = "2.7.0"
+workRuntimeKtx = "2.10.1"
 
 [libraries]
 accompanist-flowlayout = { module = "com.google.accompanist:accompanist-flowlayout", version.ref = "accompanistFlowlayout" }
 androidx-compiler = { module = "androidx.compose.compiler:compiler", version.ref = "compiler" }
-androidx-core-ktx = { group = "androidx.core", name = "core-ktx", version.ref = "coreKtx" }
 androidx-room-ktx = { module = "androidx.room:room-ktx", version.ref = "roomKtx" }
 androidx-room-paging = { module = "androidx.room:room-paging", version.ref = "roomPaging" }
 androidx-room-runtime = { module = "androidx.room:room-runtime", version.ref = "roomRuntime" }
+coil-compose = { module = "io.coil-kt.coil3:coil-compose", version.ref = "coilCompose" }
+coil-network-okhttp = { module = "io.coil-kt.coil3:coil-network-okhttp", version.ref = "coilNetworkOkhttp" }
+firebase-analytics = { module = "com.google.firebase:firebase-analytics" }
+firebase-auth-ktx = { module = "com.google.firebase:firebase-auth-ktx" }
+firebase-bom = { module = "com.google.firebase:firebase-bom", version.ref = "firebaseBom" }
+firebase-firestore-ktx = { module = "com.google.firebase:firebase-firestore-ktx" }
+firebase-storage-ktx = { module = "com.google.firebase:firebase-storage-ktx" }
 generativeai = { module = "com.google.ai.client.generativeai:generativeai", version.ref = "generativeai" }
+google-firebase-storage-ktx = { module = "com.google.firebase:firebase-storage-ktx" }
 junit = { group = "junit", name = "junit", version.ref = "junit" }
 androidx-junit = { group = "androidx.test.ext", name = "junit", version.ref = "junitVersion" }
 androidx-espresso-core = { group = "androidx.test.espresso", name = "espresso-core", version.ref = "espressoCore" }
@@ -47,8 +56,6 @@ androidx-ui-tooling-preview = { group = "androidx.compose.ui", name = "ui-toolin
 androidx-ui-test-manifest = { group = "androidx.compose.ui", name = "ui-test-manifest" }
 androidx-ui-test-junit4 = { group = "androidx.compose.ui", name = "ui-test-junit4" }
 androidx-material3 = { group = "androidx.compose.material3", name = "material3" }
-kalendar = { module = "com.himanshoe:kalendar", version.ref = "kalendar" }
-koin-android = { module = "io.insert-koin:koin-android", version.ref = "koinVersion" }
 kotlinx-coroutines-android = { module = "org.jetbrains.kotlinx:kotlinx-coroutines-android", version.ref = "kotlinxCoroutinesAndroid" }
 kotlinx-coroutines-core = { module = "org.jetbrains.kotlinx:kotlinx-coroutines-core", version.ref = "coroutinesVersion" }
 ktor-client-android = { module = "io.ktor:ktor-client-android", version.ref = "ktorVersion" }
@@ -58,9 +65,11 @@ ktor-client-core = { module = "io.ktor:ktor-client-core", version.ref = "ktorVer
 ktor-client-logging = { module = "io.ktor:ktor-client-logging", version.ref = "ktorVersion" }
 ktor-client-serialization-jvm = { module = "io.ktor:ktor-client-serialization-jvm", version.ref = "ktorVersion" }
 androidx-hilt-navigation-compose = { module = "androidx.hilt:hilt-navigation-compose", version.ref = "hiltNavigationCompose" }
+play-services-auth = { module = "com.google.android.gms:play-services-auth", version.ref = "playServicesAuth" }
 retrofit2-kotlin-coroutines-adapter = { module = "com.jakewharton.retrofit:retrofit2-kotlin-coroutines-adapter", version.ref = "retrofit2KotlinCoroutinesAdapter" }
 firebase-auth = { group = "com.google.firebase", name = "firebase-auth", version.ref = "firebaseAuth" }
 room-compiler = { module = "androidx.room:room-compiler", version.ref = "roomCompilerVersion" }
+androidx-work-runtime-ktx = { group = "androidx.work", name = "work-runtime-ktx", version.ref = "workRuntimeKtx" }
 
 [plugins]
 android-application = { id = "com.android.application", version.ref = "agp" }

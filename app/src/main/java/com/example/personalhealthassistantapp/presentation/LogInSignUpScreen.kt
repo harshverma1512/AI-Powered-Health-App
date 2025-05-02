@@ -1,5 +1,8 @@
 package com.example.personalhealthassistantapp.presentation
 
+import android.content.Context
+import android.util.Log
+import android.widget.Toast
 import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
@@ -46,6 +49,13 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.navigation.NavController
 import com.example.personalhealthassistantapp.R
+import com.example.personalhealthassistantapp.utility.SharedPrefManager
+import com.example.personalhealthassistantapp.utility.Utils
+import com.google.firebase.Firebase
+import com.google.firebase.auth.FirebaseAuth
+import com.google.firebase.auth.auth
+
+private var auth: FirebaseAuth = Firebase.auth
 
 @Composable
 fun LoginSignupScreen(
@@ -68,8 +78,8 @@ fun LoginSignupScreen(
     }
     val confirmPassword = rememberSaveable {
         mutableStateOf("")
-
     }
+    val context = LocalContext.current
 
     Column(
         modifier = modifier
@@ -237,21 +247,27 @@ fun LoginSignupScreen(
                         }
                     }
                 }
-
             }
 
-                Button(
-                    onClick = {
-                        if (confirmPassword.value != password.value && !authenticationTypeLogin.value) {
-                            matched.value = false
-                            return@Button
-                        }
-                        navController.navigate(ScreensName.SelectAvatarScreen.name)
-                    },
-                    modifier
-                        .fillMaxWidth()
-                        .height(75.dp)
-                        .padding(top = 20.dp),
+            Button(
+                onClick = {
+                    if (!authenticationTypeLogin.value && password.value != confirmPassword.value) {
+                        matched.value = false
+                        Toast.makeText(context, " Confirm Password must be Same as Password!", Toast.LENGTH_SHORT).show()
+                        return@Button
+                    }
+                    if (authenticationTypeLogin.value && password.value.isNotEmpty() && email.value.isNotEmpty()){
+                        login(context, email.value.trim(), password.value.trim(), navController)
+                    } else if (password.value.isNotEmpty() && email.value.isNotEmpty() && confirmPassword.value.isNotEmpty() && !authenticationTypeLogin.value) {
+                        signup(context, email.value.trim(), password.value.trim(), navController)
+                    }else{
+                        Toast.makeText(context, "Please Fill All Fields", Toast.LENGTH_SHORT).show()
+                    }
+                },
+                modifier
+                    .fillMaxWidth()
+                    .height(75.dp)
+                    .padding(top = 20.dp),
                     colors = ButtonDefaults.buttonColors(colorResource(id = R.color.btn_color)),
                     shape = RoundedCornerShape(10.dp)
                 ) {
@@ -293,4 +309,43 @@ fun LoginSignupScreen(
 
         }
     }
+}
+
+
+private fun login(
+    context: Context,
+    email: String,
+    password: String,
+    navController: NavController
+) {
+    Firebase.auth.signInWithEmailAndPassword(email, password)
+        .addOnCompleteListener { task ->
+            if (task.isSuccessful) {
+                Toast.makeText(context, "Login Successful!", Toast.LENGTH_SHORT).show()
+                SharedPrefManager(context).saveLoginStatus(true)
+                navController.navigate(ScreensName.HomeScreen.name)
+            } else {
+                Toast.makeText(context, "Login Failed: ${task.exception?.message}", Toast.LENGTH_SHORT).show()
+            }
+        }
+}
+
+
+// Firebase Signup
+private fun signup(
+    context: Context,
+    email: String,
+    password: String,
+    navController: NavController,
+) {
+   auth.createUserWithEmailAndPassword(email, password)
+        .addOnCompleteListener { task ->
+            if (task.isSuccessful) {
+                Toast.makeText(context, "Signup Successful!", Toast.LENGTH_SHORT).show()
+                navController.navigate(ScreensName.ProfileScreen.name)
+                SharedPrefManager(context).saveLoginStatus(true)
+            } else {
+                Toast.makeText(context, "Signup Fail!", Toast.LENGTH_SHORT).show()
+            }
+        }
 }

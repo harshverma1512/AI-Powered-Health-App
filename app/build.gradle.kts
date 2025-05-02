@@ -4,8 +4,7 @@ plugins {
     alias(libs.plugins.compose.compiler)
     id("com.google.dagger.hilt.android") // Add Hilt plugin
     id("kotlin-kapt")
-  //  alias(libs.plugins.google.gms.google.services) // Ensure kapt is enabled
-
+    id("com.google.gms.google-services")
 }
 
 android {
@@ -14,8 +13,8 @@ android {
 
     defaultConfig {
         applicationId = "com.example.personalhealthassistantapp"
-        minSdk = 24
-        targetSdk = 34
+        minSdk = 26
+        targetSdk = 35
         versionCode = 1
         versionName = "1.0"
 
@@ -58,7 +57,7 @@ android {
 
 dependencies {
 
-    implementation(libs.androidx.core.ktx)
+  //  implementation(libs.androidx.core.ktx)
     implementation(libs.androidx.lifecycle.runtime.ktx)
     implementation(libs.androidx.activity.compose)
     implementation(platform(libs.androidx.compose.bom))
@@ -76,7 +75,17 @@ dependencies {
     implementation(libs.androidx.compiler)
 
     //Firebase
-  //  implementation(libs.firebase.auth)
+    implementation(libs.firebase.auth)
+    implementation(platform(libs.firebase.bom))
+    implementation(libs.firebase.analytics)
+    implementation(libs.play.services.auth)
+    implementation (libs.firebase.storage.ktx)
+    implementation(libs.firebase.auth.ktx)
+    implementation(libs.google.firebase.storage.ktx)
+    implementation(libs.firebase.firestore.ktx)
+
+    //Worker
+    implementation(libs.androidx.work.runtime.ktx)
 
     //ktor
     implementation(libs.ktor.client.android)
@@ -89,10 +98,12 @@ dependencies {
     annotationProcessor(libs.room.compiler)
     implementation(libs.androidx.room.ktx)
     implementation(libs.androidx.room.paging)
+    kapt(libs.room.compiler)
 
+    //coil
+    implementation(libs.coil.network.okhttp)
+    implementation(libs.coil.compose)
 
-
-    //Navigation
 
     //Hilt
     implementation(libs.hilt.android)
