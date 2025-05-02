@@ -45,13 +45,15 @@ import com.example.personalhealthassistantapp.utility.SharedPrefManager
 fun WaterGoalSetupScreen(
     modifier: Modifier = Modifier, navController : NavController
 ) {
-    var selectedUnit by remember { mutableStateOf("mL") }
     var isEditing by remember { mutableStateOf(false) }
     var goalText by remember { mutableStateOf(0) }
     var tempGoalText by remember { mutableStateOf(goalText.toString()) }
     val units = listOf("mL", "L", "US Oz", "UK Oz")
     val context = LocalContext.current
+    var selectedUnit by remember { mutableStateOf(SharedPrefManager(context).getWaterUnit()) }
     goalText = SharedPrefManager(context = context).getWaterGoal()
+
+
     Scaffold { innerPadding ->
         Column(
             modifier = modifier

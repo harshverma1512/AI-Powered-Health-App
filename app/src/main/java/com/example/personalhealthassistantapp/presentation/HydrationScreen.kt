@@ -95,25 +95,27 @@ fun HydrationRecord(modifier: Modifier = Modifier, navController: NavController)
             Spacer(modifier = Modifier.height(10.dp))
 
             HalfCircularWaterTracker(
-                currentIntake = SharedPrefManager(context = navController.context).getWaterTake(),
-                goal = SharedPrefManager(navController.context).getWaterGoal()
+                currentIntake = SharedPrefManager(context = navController.context).getWaterTake().toFloat(),
+                goal = convertToMilliliters(
+                    SharedPrefManager(navController.context).getWaterGoal().toFloat(),
+                    SharedPrefManager(navController.context).getWaterUnit()
+                ).toFloat()
             )
-
         }
     }
 }
 
 @Composable
 fun HalfCircularWaterTracker(
-    currentIntake: Int = 0,
-    goal: Int,
+    currentIntake: Float,
+    goal: Float,
     modifier: Modifier = Modifier
 ) {
     val context = LocalContext.current
     var showDialog by remember { mutableStateOf(false) }
-    var currentIntake by remember { mutableIntStateOf(currentIntake) }
+    var currentIntake by remember { mutableStateOf(currentIntake) }
     val unit = SharedPrefManager(context).getWaterUnit() ?: "mL"
-    val progress = currentIntake.toFloat() / convertToMilliliters(goal.toFloat(), unit)
+    val progress = currentIntake / goal
 
     Box(
         contentAlignment = Alignment.Center,
@@ -196,7 +198,7 @@ fun HalfCircularWaterTracker(
                             }
 
                             currentIntake += addedAmount
-                            SharedPrefManager(context).saveWaterTake(currentIntake)
+                            SharedPrefManager(context).saveWaterTake(currentIntake.toInt())
 
                             if (currentIntake >= goal) {
                                 showDialog = true
