@@ -38,11 +38,13 @@ class ChatViewModel @Inject constructor() : ViewModel() {
             userData = it
             Log.d("checkUserData", it.toString())
             userData?.let {
-                viewModelScope.launch {
-                    val bmi = calculateBMI(userData?.get(SharedPrefManager.WEIGHT) as Long,
-                        userData?.get(SharedPrefManager.WEIGHT_MEASUREMENT) as String,
-                        userData?.get(SharedPrefManager.HEIGHT) as Long)
-                    score = bmi.toInt()
+                if (userData?.get(SharedPrefManager.WEIGHT) != null && userData?.get(SharedPrefManager.HEIGHT) != null){
+                    viewModelScope.launch {
+                        val bmi = calculateBMI(userData?.get(SharedPrefManager.WEIGHT) as Long,
+                            userData?.get(SharedPrefManager.WEIGHT_MEASUREMENT) as String,
+                            userData?.get(SharedPrefManager.HEIGHT) as Long)
+                        score = bmi.toInt()
+                    }
                 }
             }
         }, onError = {
