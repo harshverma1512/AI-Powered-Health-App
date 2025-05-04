@@ -1,9 +1,11 @@
 package com.example.personalhealthassistantapp.presentation
 
 import android.annotation.SuppressLint
+import android.content.Context
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
+import androidx.compose.foundation.content.contentReceiver
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.shape.CircleShape
@@ -254,19 +256,25 @@ fun FitnessTrackerSection(navController: NavController) {
         Text("Fitness & Activity", fontWeight = FontWeight.Bold)
         SleepCard(navHostController = navController)
         HydrationCard(navController = navController)
-        StepsTakenCard(navController =  navController)
+        MedicationAlarmCard(navController =  navController, context = navController.context)
     }
 }
 
 
 @Composable
-fun StepsTakenCard(
+fun MedicationAlarmCard(
     steps: Int = 1000,
-    navController: NavController
+    navController: NavController, context : Context
 ) {
     Card(
         modifier = Modifier
-            .clickable { navController.navigate(ScreensName.MedicationManagement.name) }
+            .clickable {
+                if (!SharedPrefManager(context).isMedication()) {
+                    navController.navigate(ScreensName.NoMedicationScreen.name)
+                } else {
+                    navController.navigate(ScreensName.MedicationManagement.name)
+                }
+            }
             .fillMaxWidth()
             .height(80.dp),
         shape = RoundedCornerShape(16.dp),
@@ -300,7 +308,7 @@ fun StepsTakenCard(
 
                 Column {
                     Text(
-                        text = "Steps Taken",
+                        text = "Medication Alarm",
                         style = MaterialTheme.typography.titleMedium.copy(
                             fontWeight = FontWeight.Bold
                         ),
@@ -474,7 +482,7 @@ fun SleepCard(
                 CircularProgressIndicator(
                     progress = progress,
                     strokeWidth = 4.dp,
-                    color = Color(0xFF8B5CF6),
+                    color = colorResource(id = R.color.btn_color),
                     trackColor = Color.Gray,
                     modifier = Modifier.fillMaxSize()
                 )

@@ -23,12 +23,15 @@ import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
 import com.example.personalhealthassistantapp.NotificationSetupScreen
+import com.example.personalhealthassistantapp.presentation.AddMedicationScreen
 import com.example.personalhealthassistantapp.presentation.ChatBotScreen
 import com.example.personalhealthassistantapp.presentation.HealthTextAnalysisScreen
 import com.example.personalhealthassistantapp.presentation.HeightPickerScreen
 import com.example.personalhealthassistantapp.presentation.HomeScreen
 import com.example.personalhealthassistantapp.presentation.HydrationRecord
 import com.example.personalhealthassistantapp.presentation.LoginSignupScreen
+import com.example.personalhealthassistantapp.presentation.MyMedicationsScreen
+import com.example.personalhealthassistantapp.presentation.NoMedicationsScreen
 import com.example.personalhealthassistantapp.presentation.ProfileScreen
 import com.example.personalhealthassistantapp.presentation.ScreensName
 import com.example.personalhealthassistantapp.presentation.SleepTrackingScreen
@@ -125,6 +128,9 @@ class MainActivity : ComponentActivity() {
     fun NavigationGraph(viewModel: ChatViewModel, dataBaseViewModel: DataBaseViewModel) {
         val navController = rememberNavController()
         NavHost(navController = navController, startDestination = ScreensName.SplashScreen.name) {
+            composable(ScreensName.AddMedicationScreen.name){
+                AddMedicationScreen(navController = navController)
+            }
             composable(ScreensName.SplashScreen.name) {
                 SplashScreen(navController)
             }
@@ -155,8 +161,11 @@ class MainActivity : ComponentActivity() {
             composable(ScreensName.RegisterScreen.name) {
                 LoginSignupScreen(authType = false, navController = navController)
             }
-            composable(ScreensName.ForgotPasswordScreen.name) {
-
+            composable(ScreensName.MedicationManagement.name) {
+                MyMedicationsScreen(navController =  navController)
+            }
+            composable(ScreensName.NoMedicationScreen.name){
+                NoMedicationsScreen(navController = navController)
             }
             composable(ScreensName.SleepTrackingScreen.name) {
                 SleepTrackingScreen(navController, dataBaseViewModel)

@@ -60,7 +60,7 @@ fun HydrationRecord(modifier: Modifier = Modifier, navController: NavController)
                 .fillMaxSize()
                 .verticalScroll(rememberScrollState())
                 .background(color = colorResource(id = R.color.white))
-                .padding(14.dp)
+                .padding(14.dp), horizontalAlignment = Alignment.CenterHorizontally
         ) {
             Row(
                 verticalAlignment = Alignment.CenterVertically, modifier = Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.SpaceBetween
@@ -87,7 +87,7 @@ fun HydrationRecord(modifier: Modifier = Modifier, navController: NavController)
                 painter = painterResource(id = R.drawable.water_goal),
                 contentDescription = "",
                 modifier = Modifier
-                    .fillMaxWidth()
+                    .width(300.dp)
                     .height(LocalConfiguration.current.screenHeightDp.dp * 0.4f),
                 contentScale = ContentScale.Crop
             )

@@ -1,5 +1,6 @@
 package com.example.personalhealthassistantapp.domain.services
 
+import android.app.AlarmManager
 import android.app.Notification
 import android.app.NotificationChannel
 import android.app.NotificationManager
@@ -8,11 +9,14 @@ import android.content.BroadcastReceiver
 import android.content.Context
 import android.content.Intent
 import android.media.Ringtone
+import android.os.Build
 import android.util.Log
 import androidx.core.app.NotificationCompat
 import androidx.core.content.ContextCompat
 import com.example.personalhealthassistantapp.R
 import com.example.personalhealthassistantapp.presentation.activity.FullScreenAlarmActivity
+import com.example.personalhealthassistantapp.utility.SharedPrefManager.Companion.HYDRATION_SCHEDULE
+import com.example.personalhealthassistantapp.utility.SharedPrefManager.Companion.SLEEP_SCHEDULE
 
 
 class AlarmReceiver : BroadcastReceiver() {
@@ -22,11 +26,17 @@ class AlarmReceiver : BroadcastReceiver() {
     }
 
     override fun onReceive(context: Context, intent: Intent) {
+        if (intent.getStringExtra("type")?.equals(SLEEP_SCHEDULE) == true){
+            sleepAlarm(context, intent)
+        }else if (intent.getStringExtra("type")?.equals(HYDRATION_SCHEDULE) == true){
+            hydrationAlarm(context)
+        }
+    }
+
+
+    private fun sleepAlarm(context : Context, intent: Intent){
         val label = intent.getStringExtra("EXTRA_MESSAGE") ?: "Alarm"
         val time = intent.getStringExtra("EXTRA_TIME") ?: ""
-
-        Log.d("checkAlarm", "its working on background")
-
         val fullScreenIntent = Intent(context, FullScreenAlarmActivity::class.java).apply {
             flags = Intent.FLAG_ACTIVITY_NEW_TASK or Intent.FLAG_ACTIVITY_CLEAR_TOP
             putExtra("EXTRA_MESSAGE", label)
@@ -42,7 +52,7 @@ class AlarmReceiver : BroadcastReceiver() {
 
         val notificationManager = context.getSystemService(Context.NOTIFICATION_SERVICE) as NotificationManager
 
-        if (android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.O) {
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
             val channel = NotificationChannel(
                 "alarm_channel",
                 "Alarm Notifications",
@@ -72,4 +82,24 @@ class AlarmReceiver : BroadcastReceiver() {
             Intent(context, AlarmSoundService::class.java)
         )
     }
+
+    private fun hydrationAlarm(context: Context){
+        val notificationManager = context.getSystemService(Context.NOTIFICATION_SERVICE) as NotificationManager
+
+        val channelId = "reminder_channel"
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
+            val channel = NotificationChannel(channelId, "Reminders", NotificationManager.IMPORTANCE_HIGH)
+            notificationManager.createNotificationChannel(channel)
+        }
+
+        val notification = NotificationCompat.Builder(context, channelId)
+            .setContentTitle("Health Reminder")
+            .setContentText("Time to check your health or drink water!")
+            .setSmallIcon(R.drawable.water_bottle)
+            .build()
+
+        notificationManager.notify(System.currentTimeMillis().toInt(), notification)
+
+    }
+
 }

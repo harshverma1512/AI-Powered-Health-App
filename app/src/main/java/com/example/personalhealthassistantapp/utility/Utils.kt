@@ -1,8 +1,10 @@
 package com.example.personalhealthassistantapp.utility
 
 
+import android.app.AlarmManager
+import android.app.PendingIntent
 import android.content.Context
-import android.widget.Toast
+import android.content.Intent
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.clickable
 import androidx.compose.runtime.Composable
@@ -37,32 +39,6 @@ object Utils {
                 onError(it)
             }
     }
-
-
-    private fun scheduleHydrationReminder(context: Context) {
-        val workRequest = PeriodicWorkRequestBuilder<ReminderWorker>(
-            3, TimeUnit.HOURS
-        ).build()
-
-        WorkManager.getInstance(context).enqueueUniquePeriodicWork(
-            "HydrationReminderWork",
-            ExistingPeriodicWorkPolicy.KEEP,
-            workRequest
-        )
-    }
-
-    private fun cancelHydrationReminder(context: Context) {
-        WorkManager.getInstance(context).cancelUniqueWork("SleepReminderWork")
-    }
-
-    fun setHydrationReminderEnabled(context: Context, enabled: Boolean) {
-        if (enabled) {
-            scheduleHydrationReminder(context)
-        } else {
-            cancelHydrationReminder(context)
-        }
-    }
-
 
 
     fun fetchCurrentUserData(
