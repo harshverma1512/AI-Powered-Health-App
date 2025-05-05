@@ -128,6 +128,14 @@ class SharedPrefManager(context: Context) {
         return daysStringSet.map { DayOfWeek.valueOf(it) }.toSet()
     }
 
+    fun setAutoMedicationReminder(autoReminder: Boolean) {
+        sharedPref.edit() {putBoolean(MEDICATION_ASSISTANT_NOTIFY, autoReminder)}
+    }
+
+    fun getAutoMedicationReminder(): Boolean {
+        return sharedPref.getBoolean(MEDICATION_ASSISTANT_NOTIFY, false)
+    }
+
     fun saveUsername(username: String) {
         sharedPref.edit() { putString(KEY_USERNAME, username) }
     }

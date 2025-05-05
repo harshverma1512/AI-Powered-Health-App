@@ -1,5 +1,6 @@
 package com.example.personalhealthassistantapp.presentation
 
+import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
@@ -28,6 +29,8 @@ import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.MutableState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
@@ -38,34 +41,36 @@ import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.colorResource
+import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.navigation.NavController
 import com.example.personalhealthassistantapp.R
+import com.example.personalhealthassistantapp.data.model.Medication
+import com.example.personalhealthassistantapp.presentation.viewmodel.DataBaseViewModel
 import com.example.personalhealthassistantapp.utility.Utils
 import kotlinx.coroutines.CoroutineScope
 import java.time.LocalDate
+import java.time.LocalTime
+import java.time.format.DateTimeFormatter
+import java.util.Locale
+import kotlin.coroutines.coroutineContext
 
 
 @Composable
 fun MyMedicationsScreen(
     modifier: Modifier = Modifier,
     navController: NavController,
+    dataBaseViewModel: DataBaseViewModel
 ) {
     val selectedDate = remember { mutableStateOf(LocalDate.now()) }
+    var medicationList = remember { mutableStateOf<List<Medication>>(emptyList()) }
 
-    val sampleMedications = listOf(
-        Medication("Amoxiciline", "Before Eating", "250mg", true),
-        Medication("Losartan", "After eating", "500mg", false),
-        Medication("Albuterol", "Before Eating", "1kg", true)
-    )
-
-    val laterMeds = listOf(
-        Medication("Losartan", "Before Eating", "250mg", false),
-        Medication("Omeprazole", "After Eating", "100mg", true)
-    )
+    LaunchedEffect(Unit) {
+        medicationList.value = dataBaseViewModel.getAllMedication()
+    }
     Scaffold {
         Column(
             modifier = Modifier
@@ -130,9 +135,8 @@ fun MyMedicationsScreen(
             Spacer(modifier = Modifier.height(16.dp))
 
             LazyColumn {
-                item {
-                    MedicationSection("8:00 AM", sampleMedications)
-                    MedicationSection("9:00 AM", laterMeds)
+                items(medicationList.value.size) { index ->
+                    MedicationSection("", medicationList.value)
                 }
             }
         }
@@ -140,14 +144,16 @@ fun MyMedicationsScreen(
 }
 
     @Composable
-    fun MedicationSection(time: String, meds: List<Medication>) {
+    fun MedicationSection(time: String?, meds: List<Medication>) {
+        val formatter = DateTimeFormatter.ofPattern("h:mm a", Locale.ENGLISH)
+        val formattedTime = time?.format(formatter)
         Column(modifier = Modifier.fillMaxWidth()) {
             Row(
                 modifier = Modifier.padding(vertical = 8.dp),
                 horizontalArrangement = Arrangement.SpaceBetween
             ) {
                 Text(
-                    text = time, fontWeight = FontWeight.Bold, color = Color(0xFF2D2D2D)
+                    text = formattedTime!!, fontWeight = FontWeight.Bold, color = Color(0xFF2D2D2D)
                 )
                 Spacer(modifier = Modifier.width(10.dp))
                 Text(
@@ -176,14 +182,14 @@ fun MyMedicationsScreen(
             Row(
                 modifier = Modifier.padding(16.dp), verticalAlignment = Alignment.CenterVertically
             ) {
-                //  Icon(Icons.Default.Medication, contentDescription = null)
+              Image(painter = painterResource(R.drawable.drugs), contentDescription = null, modifier = Modifier.size(24.dp))
 
                 Spacer(modifier = Modifier.width(12.dp))
 
                 Column(
                     modifier = Modifier.weight(1f)
                 ) {
-                    Text(text = med.name, fontWeight = FontWeight.Bold)
+                    med.name?.let { Text(text = it, fontWeight = FontWeight.Bold) }
                     Text(
                         text = "${med.instructions} • ${med.dosage}",
                         color = Color.Gray,
@@ -191,18 +197,13 @@ fun MyMedicationsScreen(
                     )
                 }
 
-                Checkbox(
-                    checked = isChecked,
-                    onCheckedChange = { isChecked = it },
-                    colors = CheckboxDefaults.colors(checkedColor = Color(0xFF007AFF))
-                )
+                isChecked?.let {
+                    Checkbox(
+                        checked = it,
+                        onCheckedChange = { isChecked = it },
+                        colors = CheckboxDefaults.colors(checkedColor = Color(0xFF007AFF))
+                    )
+                }
             }
         }
     }
-
-data class Medication(
-    val name: String,
-    val instructions: String,
-    val dosage: String,
-    val checked: Boolean,
-)

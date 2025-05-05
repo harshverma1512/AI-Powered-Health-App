@@ -26,6 +26,7 @@ import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import com.example.personalhealthassistantapp.R
+import com.example.personalhealthassistantapp.data.model.Medication
 
 
 @Composable
@@ -56,7 +57,7 @@ fun MedicationReminderPopUp(med: Medication) {
             Column(
                 modifier = Modifier.weight(1f)
             ) {
-                Text(text = med.name, fontWeight = FontWeight.Bold, color = Color.Black)
+                med.name?.let { Text(text = it, fontWeight = FontWeight.Bold, color = Color.Black) }
                 Text(
                     text = "${med.instructions} • ${med.dosage}",
                     color = Color.Gray,
@@ -64,14 +65,16 @@ fun MedicationReminderPopUp(med: Medication) {
                 )
             }
 
-            Checkbox(
-                checked = isChecked,
-                onCheckedChange = { isChecked = it },
-                colors = CheckboxDefaults.colors(
-                    checkedColor = Color(0xFF007AFF),
-                    uncheckedColor = Color.LightGray
+            isChecked?.let {
+                Checkbox(
+                    checked = it,
+                    onCheckedChange = { isChecked = it },
+                    colors = CheckboxDefaults.colors(
+                        checkedColor = Color(0xFF007AFF),
+                        uncheckedColor = Color.LightGray
+                    )
                 )
-            )
+            }
         }
     }
 }

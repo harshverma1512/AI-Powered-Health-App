@@ -129,7 +129,7 @@ class MainActivity : ComponentActivity() {
         val navController = rememberNavController()
         NavHost(navController = navController, startDestination = ScreensName.SplashScreen.name) {
             composable(ScreensName.AddMedicationScreen.name){
-                AddMedicationScreen(navController = navController)
+                AddMedicationScreen(navController = navController, dataBaseViewModel)
             }
             composable(ScreensName.SplashScreen.name) {
                 SplashScreen(navController)
@@ -162,7 +162,7 @@ class MainActivity : ComponentActivity() {
                 LoginSignupScreen(authType = false, navController = navController)
             }
             composable(ScreensName.MedicationManagement.name) {
-                MyMedicationsScreen(navController =  navController)
+                MyMedicationsScreen(navController =  navController, dataBaseViewModel = dataBaseViewModel)
             }
             composable(ScreensName.NoMedicationScreen.name){
                 NoMedicationsScreen(navController = navController)

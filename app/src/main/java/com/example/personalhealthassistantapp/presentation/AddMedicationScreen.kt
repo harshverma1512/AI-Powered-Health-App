@@ -50,15 +50,24 @@ import java.time.format.DateTimeFormatter
 import androidx.compose.material3.*
 import androidx.compose.foundation.*
 import androidx.compose.foundation.layout.Box
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.unit.*
+import com.example.personalhealthassistantapp.data.model.Medication
+import com.example.personalhealthassistantapp.presentation.viewmodel.DataBaseViewModel
+import com.example.personalhealthassistantapp.utility.SharedPrefManager
+import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.launch
 import java.time.*
+import kotlin.coroutines.CoroutineContext
 
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun AddMedicationScreen(
     navController: NavController,
+    dataBaseViewModel: DataBaseViewModel
 ) {
     var name by remember { mutableStateOf("") }
     var frequency by remember { mutableStateOf("Once Daily") }
@@ -70,7 +79,7 @@ fun AddMedicationScreen(
 
     var showStartPicker by remember { mutableStateOf(false) }
     var showEndPicker by remember { mutableStateOf(false) }
-
+    val scrollState = rememberScrollState()
     val formatter = DateTimeFormatter.ofPattern("MMM dd")
     val frequencies = listOf("Once Daily", "Twice Daily", "3x Per Week", "Every Other Day")
 
@@ -78,6 +87,7 @@ fun AddMedicationScreen(
         Column(
             modifier = Modifier
                 .fillMaxSize()
+                .verticalScroll(scrollState)
                 .padding(it)
                 .padding(16.dp)
         ) {
@@ -126,11 +136,11 @@ fun AddMedicationScreen(
 
             Spacer(Modifier.height(16.dp))
             MedicationDurationSection(startDate, endDate, onStartDateClick = {
-
+                showStartPicker = true
             }, onEndDateClick = {
-
+                showEndPicker = true
             }, mealTiming) {
-
+                mealTiming = it
             }
 
             Spacer(Modifier.height(16.dp))
@@ -179,10 +189,15 @@ fun AddMedicationScreen(
 
             Button(
                 onClick = {
-
+                    CoroutineScope(Dispatchers.IO).launch {
+                        dataBaseViewModel.insertMedication(Medication(0, name, customInstruction,frequency,
+                            startDate.toString(),
+                            endDate.toString(), mealTiming, false))
+                    }
+                    navController.popBackStack()
                 },
                 modifier = Modifier
-                    .fillMaxWidth()
+                    .fillMaxWidth().padding(7.dp)
                     .height(56.dp),
                 colors = ButtonDefaults.buttonColors(containerColor = Color(0xFF007AFF))
             ) {
@@ -192,9 +207,7 @@ fun AddMedicationScreen(
             }
         }
 
-        if (autoReminder){
-            // save local based on that we go throw user need auto reminder or not
-        }
+        SharedPrefManager(context = LocalContext.current).setAutoMedicationReminder(autoReminder)
 
         // Start date picker
         if (showStartPicker) {

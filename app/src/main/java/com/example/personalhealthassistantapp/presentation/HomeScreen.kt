@@ -263,7 +263,6 @@ fun FitnessTrackerSection(navController: NavController) {
 
 @Composable
 fun MedicationAlarmCard(
-    steps: Int = 1000,
     navController: NavController, context : Context
 ) {
     Card(
@@ -297,7 +296,7 @@ fun MedicationAlarmCard(
                     contentAlignment = Alignment.Center
                 ) {
                     Icon(
-                        painter = painterResource(id = R.drawable.walk), // Replace with your walking icon
+                        painter = painterResource(id = R.drawable.drugs), // Replace with your walking icon
                         contentDescription = "Steps Icon",
                         tint = Color(0xFF7D8FAB),
                         modifier = Modifier.size(24.dp)
@@ -308,14 +307,14 @@ fun MedicationAlarmCard(
 
                 Column {
                     Text(
-                        text = "Medication Alarm",
+                        text = "Medications",
                         style = MaterialTheme.typography.titleMedium.copy(
                             fontWeight = FontWeight.Bold
                         ),
                         color = Color(0xFF1F2937)
                     )
                     Text(
-                        text = "You've taken $steps steps.",
+                        text = "For all you need we care about",
                         style = MaterialTheme.typography.bodySmall,
                         color = Color(0xFF9CA3AF)
                     )

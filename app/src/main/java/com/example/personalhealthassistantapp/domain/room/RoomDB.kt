@@ -4,6 +4,7 @@ import android.content.Context
 import androidx.room.Database
 import androidx.room.Room
 import androidx.room.RoomDatabase
+import com.example.personalhealthassistantapp.data.model.Medication
 import com.example.personalhealthassistantapp.data.model.SleepHistoryModel
 import dagger.Module
 import dagger.Provides
@@ -12,9 +13,10 @@ import dagger.hilt.android.qualifiers.ApplicationContext
 import dagger.hilt.components.SingletonComponent
 import javax.inject.Singleton
 
-@Database(entities = [SleepHistoryModel::class], version = 1, exportSchema = false )
+@Database(entities = [SleepHistoryModel::class, Medication::class], version = 1, exportSchema = false )
 abstract class RoomDB : RoomDatabase(){
     abstract fun sleepDao(): SleepHistoryDao
+    abstract fun medicationDao(): MedicationDao
 }
 
 
@@ -34,4 +36,7 @@ object DatabaseModule {
 
     @Provides
     fun provideSleepDao(database: RoomDB): SleepHistoryDao = database.sleepDao()
+
+    @Provides
+    fun provideMedicationDao(database: RoomDB): MedicationDao = database.medicationDao()
 }
