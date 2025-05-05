@@ -131,37 +131,83 @@ fun SleepHistorySection(dataBaseViewModel: DataBaseViewModel) {
 
 @Composable
 fun SleepHistoryCard(sleepHistoryModel: SleepHistoryModel) {
+    val maxSleepHours = 12f
+    val progress = (sleepHistoryModel.sleepDuration?.div(maxSleepHours))?.coerceIn(0f, 1f)
+
+    // Set a color based on sleep type
+    val (badgeText, color) = when (sleepHistoryModel.sleepType) {
+        "Core" -> "Core" to Color(0xFF3B82F6)      // Blue
+        "REM" -> "REM" to Color(0xFFF43F5E)        // Pink/Red
+        "Insomniac" -> "Insomniac" to Color(0xFF06B6D4) // Cyan
+        "Post REM" -> "Post REM" to Color(0xD34CAF50)  // Green
+        else -> "Other" to Color.Gray
+    }
+
     Spacer(modifier = Modifier.height(10.dp))
     Card(
-        shape = RoundedCornerShape(12.dp),
+        shape = RoundedCornerShape(16.dp),
         modifier = Modifier.fillMaxWidth(),
+        elevation = CardDefaults.cardElevation(defaultElevation = 2.dp),
         colors = CardDefaults.cardColors(containerColor = Color.White)
     ) {
-        Row(
-            modifier = Modifier
-                .padding(12.dp)
-                .fillMaxWidth(),
+        Row(modifier = Modifier.padding(10.dp).fillMaxSize(),
             verticalAlignment = Alignment.CenterVertically,
-            horizontalArrangement = Arrangement.SpaceBetween
-        ) {
-            Column {
-                Text(
-                    "${sleepHistoryModel.sleepDate}",
-                    fontWeight = FontWeight.SemiBold,
-                    color = Color.Gray
-                )
-                Text("Sleeping Hours ${sleepHistoryModel.sleepDuration}  $sleepHistoryModel.", fontWeight = FontWeight.Bold)
-                Text("Sleeping Hours ${sleepHistoryModel.sleepDuration}  $sleepHistoryModel.", fontWeight = FontWeight.Bold)
+            horizontalArrangement = Arrangement.SpaceBetween) {
+
+            Column(
+                modifier = Modifier.size(60.dp)
+                    .background(Color(0xFFF1F5F9), shape = RoundedCornerShape(8.dp))
+                    .padding(vertical = 8.dp, horizontal = 8.dp),
+                horizontalAlignment = Alignment.CenterHorizontally, verticalArrangement = Arrangement.SpaceAround
+            ) {
+                val dateParts = sleepHistoryModel.sleepDate?.split("-") // yyyy-MM-dd
+                val month = java.time.Month.of(dateParts!![1].toInt()).getDisplayName(TextStyle.SHORT, Locale.ENGLISH).uppercase()
+                val day = dateParts[2]
+                Text(text = month, fontWeight = FontWeight.Bold, fontSize = 12.sp)
+                Text(text = day, fontWeight = FontWeight.Bold, fontSize = 18.sp)
             }
-            sleepHistoryModel.sleepType?.let {
+
+            Spacer(modifier = Modifier.width(12.dp))
+
+            Column {
+                Row(modifier = Modifier.fillMaxWidth(),
+                    horizontalArrangement = Arrangement.SpaceBetween,
+                ) {
                 Text(
-                    it, color = when (it) {
-                        "Too short" -> Color.Red
-                        "Recommended" -> Color(0xFF10B981)
-                        "OK" -> Color(0xFF6366F1)
-                        else -> Color.Gray
-                    }, fontWeight = FontWeight.SemiBold
+                    text = "You slept for ${sleepHistoryModel.sleepDuration}h",
+                    fontWeight = FontWeight.Bold,
+                    fontSize = 16.sp
                 )
+                    // Sleep label badge
+                    Text(
+                        text = badgeText,
+                        color = color,
+                        fontWeight = FontWeight.SemiBold,
+                        fontSize = 10.sp,
+                        modifier = Modifier
+                            .background(color.copy(alpha = 0.1f), RoundedCornerShape(8.dp))
+                            .padding(horizontal = 6.dp)
+                    )
+                }
+                Spacer(modifier = Modifier.height(6.dp))
+
+                if (progress != null) {
+                    Box(
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .height(8.dp)
+                            .clip(RoundedCornerShape(30))
+                            .background(Color.LightGray.copy(alpha = 0.3f)) // Track background
+                    ) {
+                        Box(
+                            modifier = Modifier
+                                .fillMaxWidth(progress)
+                                .fillMaxHeight()
+                                .clip(RoundedCornerShape(30))
+                                .background(color) // Progress color
+                        )
+                    }
+                }
             }
         }
     }
