@@ -16,13 +16,25 @@ import java.time.LocalTime
 
 class BootReceiver : BroadcastReceiver() {
     override fun onReceive(context: Context, intent: Intent?) {
-        val sharedPrefManager = SharedPrefManager(context)
         if (intent?.action == Intent.ACTION_BOOT_COMPLETED) {
+
+            val sharedPrefManager = SharedPrefManager(context)
             val alarmScheduler = AndroidAlarmScheduler(context)
-            Log.d("call", "yes its calling")
-//            alarmScheduler.schedule(AlarmModel(LocalDateTime.of(LocalDate.parse(sharedPrefManager.getSleepDate()),LocalTime.parse(sharedPrefManager.getSleepTime())), ""))
-//            alarmScheduler.schedule(AlarmModel(LocalDateTime.of(LocalDate.parse(sharedPrefManager.getSleepDate()),LocalTime.parse(sharedPrefManager.getWakeupTime())), ""))
-//            alarmScheduler.hydrationSchedule(3)
+            val sleepDate = sharedPrefManager.getSleepDate()
+            val sleepTime = sharedPrefManager.getSleepTime()
+            val wakeUpTime = sharedPrefManager.getWakeupTime()
+            Log.d("BootReceiver", "Sleep time: $sleepDate $sleepTime")
+            if (sleepDate?.isNotEmpty() == true && sleepTime?.isNotEmpty() == true) {
+                val sleepDateTime =
+                    LocalDateTime.of(LocalDate.parse(sleepDate), LocalTime.parse(sleepTime))
+                val wakeUpDateTime =
+                    LocalDateTime.of(LocalDate.parse(sleepDate), LocalTime.parse(wakeUpTime))
+                alarmScheduler.schedule(AlarmModel(sleepDateTime, "Sleep Time"))
+                alarmScheduler.schedule(AlarmModel(wakeUpDateTime, "Wakeup Time"))
+            }
+            if (SharedPrefManager(context).getHydrationNotify()){
+                alarmScheduler.hydrationSchedule(3)
+            }
         }
     }
 }

@@ -28,8 +28,10 @@ class AlarmReceiver : BroadcastReceiver() {
     override fun onReceive(context: Context, intent: Intent) {
         if (intent.getStringExtra("type")?.equals(SLEEP_SCHEDULE) == true){
             sleepAlarm(context, intent)
+            Log.d("AlarmReceiver", "Sleep Reminder")
         }else if (intent.getStringExtra("type")?.equals(HYDRATION_SCHEDULE) == true){
             hydrationAlarm(context)
+            Log.d("AlarmReceiver", "Hydration Reminder")
         }
     }
 
@@ -88,7 +90,10 @@ class AlarmReceiver : BroadcastReceiver() {
 
         val channelId = "reminder_channel"
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
-            val channel = NotificationChannel(channelId, "Reminders", NotificationManager.IMPORTANCE_HIGH)
+            val channel = NotificationChannel(channelId, "Reminders", NotificationManager.IMPORTANCE_HIGH).apply {
+                description = "Hydration Reminder"
+                lockscreenVisibility = Notification.VISIBILITY_PUBLIC
+            }
             notificationManager.createNotificationChannel(channel)
         }
 

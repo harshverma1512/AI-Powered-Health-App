@@ -68,14 +68,14 @@ class ChatViewModel @Inject constructor() : ViewModel() {
     }
 
     private fun calculateBMI(
-        weight: Long = "0".toLong(), weightUnit: String = "Kg", heightCm: Long = "0".toLong()
+        weight: Long = 0, weightUnit: String = "Kg", heightCm: Long = 0
     ): Double {
         val weightInKg = if (weightUnit.lowercase() == "lbs") {
             weight.toDouble() * 0.453592
         } else {
             weight.toDouble()
         }
-        val heightInMeters = heightCm / 100
+        val heightInMeters = heightCm.toDouble() / 100
 
         return (weightInKg / (heightInMeters * heightInMeters)).roundTo(2)
     }

@@ -49,8 +49,8 @@ import com.example.personalhealthassistantapp.utility.SharedPrefManager
 @Composable
 fun NotificationSetupScreen(navController: NavController) {
     val context = LocalContext.current
-    var healthInsights by remember { mutableStateOf(SharedPrefManager(context).getHealthNotify()) }
-    var medicationReminder by remember { mutableStateOf(SharedPrefManager(context).getHealthAssistantNotify()) }
+    var healthInsights by remember { mutableStateOf(SharedPrefManager(context).getHydrationNotify()) }
+    var medicationReminder by remember { mutableStateOf(SharedPrefManager(context).getMedicalAssistantNotify()) }
     val alarmScheduler = AndroidAlarmScheduler(context)
 
     Scaffold { padding ->
@@ -110,13 +110,13 @@ fun NotificationSetupScreen(navController: NavController) {
                 }
                 alarmScheduler.hydrationSchedule(3)
                 healthInsights = it
-                SharedPrefManager(context).saveHealthNotify(it)
+                SharedPrefManager(context).saveHydrationNotify(it)
 
             }
             NotificationToggle(
                 "Medication Reminder", R.drawable.stop_notification, medicationReminder
             ) {
-                SharedPrefManager(context).saveHealthAssistantNotify(it)
+                SharedPrefManager(context).setAutoMedicationReminder(it)
                 medicationReminder = it
             }
             NotificationToggle("Sleep Alarm Reminder", R.drawable.sleep, true) {

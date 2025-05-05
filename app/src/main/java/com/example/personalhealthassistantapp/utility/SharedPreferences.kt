@@ -27,8 +27,7 @@ class SharedPrefManager(context: Context) {
         const val WEIGHT = "weight"
         const val WEIGHT_MEASUREMENT = "weight_measurement"
         const val HEIGHT = "height"
-        const val HEALTH_NOTIFY = "health_notify"
-        const val HEALTH_ASSISTANT_NOTIFY = "health_assistant_notify"
+        const val HYDRATION_NOTIFY = "hydration_notify"
         const val MEDICATION_ASSISTANT_NOTIFY = "medication_assistant_notify"
         const val MEDICATION_SELECTED = "medication_selected"
 
@@ -61,8 +60,8 @@ class SharedPrefManager(context: Context) {
     fun getWaterGoal(): Int = sharedPref.getInt(WATER_GOAL, 0)
     fun getWaterUnit() : String = sharedPref.getString(WATER_UNIT, "ml") ?: "ml"
     fun getToday() : String = sharedPref.getString(TODAY, LocalDate.now().toString()) ?: LocalDate.now().toString()
-    fun getHealthNotify() : Boolean = sharedPref.getBoolean(HEALTH_NOTIFY, true)
-    fun getHealthAssistantNotify() : Boolean = sharedPref.getBoolean(HEALTH_ASSISTANT_NOTIFY, false)
+    fun getHydrationNotify() : Boolean = sharedPref.getBoolean(HYDRATION_NOTIFY, true)
+    fun getMedicalAssistantNotify() : Boolean = sharedPref.getBoolean(MEDICATION_ASSISTANT_NOTIFY, false)
     fun isMedication(): Boolean = sharedPref.getBoolean(MEDICATION_SELECTED, false)
 
     fun setMedication(isMedicationSelected : Boolean){
@@ -83,17 +82,16 @@ class SharedPrefManager(context: Context) {
         }
     }
 
-    fun saveHealthNotify(healthNotify: Boolean) {
+    fun saveHydrationNotify(healthNotify: Boolean) {
         sharedPref.edit {
-            putBoolean(HEALTH_NOTIFY, healthNotify)
+            putBoolean(HYDRATION_NOTIFY, healthNotify)
         }
     }
 
-    fun saveHealthAssistantNotify(healthAssistantNotify: Boolean) {
-        sharedPref.edit {
-            putBoolean(HEALTH_ASSISTANT_NOTIFY, healthAssistantNotify)
-        }
+    fun setAutoMedicationReminder(autoReminder: Boolean) {
+        sharedPref.edit() {putBoolean(MEDICATION_ASSISTANT_NOTIFY, autoReminder)}
     }
+
 
     fun saveTodayDate(today: LocalDate?) {
         sharedPref.edit {
@@ -126,14 +124,6 @@ class SharedPrefManager(context: Context) {
     fun getSelectedDays(): Set<DayOfWeek> {
         val daysStringSet = sharedPref.getStringSet(SELECTED_DAYS, emptySet()) ?: emptySet()
         return daysStringSet.map { DayOfWeek.valueOf(it) }.toSet()
-    }
-
-    fun setAutoMedicationReminder(autoReminder: Boolean) {
-        sharedPref.edit() {putBoolean(MEDICATION_ASSISTANT_NOTIFY, autoReminder)}
-    }
-
-    fun getAutoMedicationReminder(): Boolean {
-        return sharedPref.getBoolean(MEDICATION_ASSISTANT_NOTIFY, false)
     }
 
     fun saveUsername(username: String) {

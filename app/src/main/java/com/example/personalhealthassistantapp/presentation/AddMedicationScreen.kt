@@ -75,11 +75,11 @@ fun AddMedicationScreen(
     var endDate by remember { mutableStateOf<LocalDate?>(null) }
     var mealTiming by remember { mutableStateOf("After") }
     var customInstruction by remember { mutableStateOf("") }
-    var autoReminder by remember { mutableStateOf(true) }
-
+    val context = LocalContext.current
     var showStartPicker by remember { mutableStateOf(false) }
     var showEndPicker by remember { mutableStateOf(false) }
     val scrollState = rememberScrollState()
+    var autoReminder by remember { mutableStateOf(SharedPrefManager(context).getMedicalAssistantNotify()) }
     val formatter = DateTimeFormatter.ofPattern("MMM dd")
     val frequencies = listOf("Once Daily", "Twice Daily", "3x Per Week", "Every Other Day")
 
@@ -194,6 +194,7 @@ fun AddMedicationScreen(
                             startDate.toString(),
                             endDate.toString(), mealTiming, false))
                     }
+                    SharedPrefManager(context = context).setMedication(true)
                     navController.popBackStack()
                 },
                 modifier = Modifier

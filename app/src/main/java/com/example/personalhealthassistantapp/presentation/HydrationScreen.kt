@@ -1,5 +1,6 @@
 package com.example.personalhealthassistantapp.presentation
 
+import android.widget.Toast
 import androidx.compose.foundation.Canvas
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
@@ -202,6 +203,20 @@ fun HalfCircularWaterTracker(
 
                             if (currentIntake >= goal) {
                                 showDialog = true
+                            }
+                        }else{
+                            if (currentIntake == 0f){
+                                Toast.makeText(
+                                    context,
+                                    "You have not set a goal",
+                                    Toast.LENGTH_SHORT
+                                ).show()
+                            }else{
+                                Toast.makeText(
+                                    context,
+                                    "You have reached your goal",
+                                    Toast.LENGTH_SHORT
+                                ).show()
                             }
                         }
                     },

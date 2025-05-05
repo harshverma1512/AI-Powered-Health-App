@@ -15,7 +15,6 @@ import androidx.work.ExistingPeriodicWorkPolicy
 import androidx.work.PeriodicWorkRequestBuilder
 import androidx.work.WorkManager
 import com.example.personalhealthassistantapp.R
-import com.example.personalhealthassistantapp.domain.services.ReminderWorker
 import com.example.personalhealthassistantapp.presentation.ScreensName
 import com.google.firebase.Firebase
 import com.google.firebase.auth.FirebaseAuth
