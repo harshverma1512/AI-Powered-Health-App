@@ -48,6 +48,7 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.navigation.NavController
 import com.example.personalhealthassistantapp.R
+import com.example.personalhealthassistantapp.domain.repository.AndroidAlarmScheduler
 import com.example.personalhealthassistantapp.utility.SharedPrefManager
 import com.example.personalhealthassistantapp.utility.Utils
 
@@ -117,6 +118,7 @@ fun HalfCircularWaterTracker(
     var currentIntake by remember { mutableStateOf(currentIntake) }
     val unit = SharedPrefManager(context).getWaterUnit() ?: "mL"
     val progress = currentIntake / goal
+    val alarmScheduler = AndroidAlarmScheduler(context)
 
     Box(
         contentAlignment = Alignment.Center,
@@ -201,6 +203,16 @@ fun HalfCircularWaterTracker(
                             currentIntake += addedAmount
                             SharedPrefManager(context).saveWaterTake(currentIntake.toInt())
 
+                            if (!SharedPrefManager(context).getHydrationNotify()){
+                                alarmScheduler.hydrationSchedule(3)
+                                SharedPrefManager(context).saveHydrationNotify(true)
+                                Toast.makeText(
+                                    context,
+                                    "We will notify you every 3 hours to drink water.",
+                                    Toast.LENGTH_LONG
+                                ).show()
+                            }
+
                             if (currentIntake >= goal) {
                                 showDialog = true
                             }
@@ -249,7 +261,7 @@ fun HalfCircularWaterTracker(
         AlertDialog(
             onDismissRequest = { showDialog = false },
             title = { Text(text = "Congratulations!") },
-            text = { Text(text = "Water Intake Full 🎉") },
+            text = { Text(text = "Water Intake Full, Keep it Up!") },
             confirmButton = {
                 Button(
                     onClick = { showDialog = false }

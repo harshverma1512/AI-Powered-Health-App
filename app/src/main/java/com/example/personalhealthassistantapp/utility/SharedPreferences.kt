@@ -60,7 +60,7 @@ class SharedPrefManager(context: Context) {
     fun getWaterGoal(): Int = sharedPref.getInt(WATER_GOAL, 0)
     fun getWaterUnit() : String = sharedPref.getString(WATER_UNIT, "ml") ?: "ml"
     fun getToday() : String = sharedPref.getString(TODAY, LocalDate.now().toString()) ?: LocalDate.now().toString()
-    fun getHydrationNotify() : Boolean = sharedPref.getBoolean(HYDRATION_NOTIFY, true)
+    fun getHydrationNotify() : Boolean = sharedPref.getBoolean(HYDRATION_NOTIFY, false)
     fun getMedicalAssistantNotify() : Boolean = sharedPref.getBoolean(MEDICATION_ASSISTANT_NOTIFY, false)
     fun isMedication(): Boolean = sharedPref.getBoolean(MEDICATION_SELECTED, false)
 
