@@ -336,6 +336,7 @@ fun FilterSleepSheetContent(onDismiss: (SleepHistoryModel) -> Unit) {
                         sleepType = selectedType
                     )
                 )
+
             },
             modifier = Modifier.fillMaxWidth(),
             colors = ButtonDefaults.buttonColors(containerColor = colorResource(R.color.btn_color))

@@ -42,12 +42,14 @@ import androidx.navigation.NavController
 import com.example.personalhealthassistantapp.data.model.SleepHistoryModel
 import com.example.personalhealthassistantapp.presentation.viewmodel.DataBaseViewModel
 import com.example.personalhealthassistantapp.utility.Utils
+import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.launch
 import java.time.LocalDate
 import java.time.YearMonth
 import java.time.format.DateTimeFormatter
 import java.time.format.TextStyle
 import java.util.*
+import kotlin.coroutines.coroutineContext
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -56,6 +58,13 @@ fun SleepTrackingScreen(navigation: NavController, dataBaseViewModel: DataBaseVi
     var showSheet by remember { mutableStateOf(false) }
     var currentDate by remember { mutableStateOf(LocalDate.now()) }
     val context = rememberCoroutineScope()
+    var sleepHistory by remember { mutableStateOf<List<SleepHistoryModel>>(emptyList()) }
+    val coroutineScope = rememberCoroutineScope()
+
+    LaunchedEffect(Unit) {
+        sleepHistory = dataBaseViewModel.getAllSleepHistory()
+    }
+
 
     Scaffold { innerPadding ->
         if (showSheet) {
@@ -70,7 +79,11 @@ fun SleepTrackingScreen(navigation: NavController, dataBaseViewModel: DataBaseVi
                             )
                         }
                         showSheet = false
-                    },
+                        coroutineScope.launch {
+                            sleepHistory = dataBaseViewModel.getAllSleepHistory()
+                        }
+                    }
+
                 )
             }
         }
@@ -92,7 +105,7 @@ fun SleepTrackingScreen(navigation: NavController, dataBaseViewModel: DataBaseVi
                 Spacer(modifier = Modifier.height(16.dp))
                 SleepOverviewCard()
                 Spacer(modifier = Modifier.height(16.dp))
-                SleepHistorySection(dataBaseViewModel)
+                SleepHistorySection(sleepHistory)
                 Spacer(modifier = Modifier.height(80.dp)) // for FAB spacing
             }
 
@@ -112,12 +125,7 @@ fun SleepTrackingScreen(navigation: NavController, dataBaseViewModel: DataBaseVi
 }
 
 @Composable
-fun SleepHistorySection(dataBaseViewModel: DataBaseViewModel) {
-    var sleepHistory by remember { mutableStateOf<List<SleepHistoryModel>>(emptyList()) }
-
-    LaunchedEffect(Unit) {
-        sleepHistory = dataBaseViewModel.getAllSleepHistory()
-    }
+fun SleepHistorySection(sleepHistory: List<SleepHistoryModel>) {
 
     Column {
         Text("Sleep History", fontWeight = FontWeight.Bold, fontSize = 18.sp)
