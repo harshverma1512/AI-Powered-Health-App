@@ -1,7 +1,10 @@
 package com.example.personalhealthassistantapp.presentation
 
 import android.content.Context
+import android.graphics.Bitmap
+import android.graphics.BitmapFactory
 import android.net.Uri
+import android.util.Base64
 import android.widget.Toast
 import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.result.contract.ActivityResultContracts
@@ -42,11 +45,13 @@ import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.asImageBitmap
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.colorResource
 import androidx.compose.ui.res.painterResource
@@ -63,27 +68,34 @@ import com.google.firebase.auth.ktx.auth
 import com.google.firebase.auth.userProfileChangeRequest
 import com.google.firebase.firestore.ktx.firestore
 import com.google.firebase.ktx.Firebase
+import com.google.firebase.storage.FirebaseStorage
+import kotlinx.coroutines.launch
+import kotlinx.coroutines.tasks.await
+import java.io.ByteArrayOutputStream
+import java.util.UUID
 
 @Composable
-@Preview(showBackground = true)
-fun ProfileScreen(navController: NavController = NavController(LocalContext.current)) {
+fun ProfileScreen(navController: NavController) {
     val context = LocalContext.current
     val db = Firebase.firestore
     val user = FirebaseAuth.getInstance().currentUser
     val userId = user?.uid ?: return
+    val coroutineScope = rememberCoroutineScope()
 
+    // State for form fields
     var fullName by remember { mutableStateOf(user.displayName ?: "") }
     var phoneNumber by remember { mutableStateOf("") }
     var email by remember { mutableStateOf(user.email ?: "") }
     var selectedAccountType by remember { mutableStateOf("Patient") }
-    var imageUri by remember { mutableStateOf<Uri?>(null) }
+    var imageBase64 by remember { mutableStateOf<String?>(null) } // Base64 string from Firestore
+    var selectedImageUri by remember { mutableStateOf<Uri?>(null) } // Local image before saving
+
+    // Image picker launcher
     val launcher = rememberLauncherForActivityResult(ActivityResultContracts.GetContent()) { uri ->
-        uri?.let {
-            imageUri = it
-        }
+        selectedImageUri = uri
     }
 
-
+    // Fetch user data on start
     LaunchedEffect(Unit) {
         user?.let {
             fullName = it.displayName ?: ""
@@ -95,11 +107,7 @@ fun ProfileScreen(navController: NavController = NavController(LocalContext.curr
                     if (document.exists()) {
                         phoneNumber = document.getString("phone") ?: ""
                         selectedAccountType = document.getString("accountType") ?: "Patient"
-
-                        val photoUrl = document.getString("photoUrl")
-                        if (!photoUrl.isNullOrEmpty()) {
-                            imageUri = Uri.parse(photoUrl)
-                        }
+                        imageBase64 = document.getString("photoUrl")
                     }
                 }
                 .addOnFailureListener {
@@ -107,7 +115,6 @@ fun ProfileScreen(navController: NavController = NavController(LocalContext.curr
                 }
         }
     }
-
 
     Column(
         modifier = Modifier
@@ -127,9 +134,15 @@ fun ProfileScreen(navController: NavController = NavController(LocalContext.curr
             launcher.launch("image/*")
         }) {
             Image(
-                painter = if (imageUri != null)
-                    rememberAsyncImagePainter(imageUri)
-                else painterResource(R.drawable.health_plus), // Default image
+                painter = when {
+                    selectedImageUri != null -> rememberAsyncImagePainter(selectedImageUri)
+                    imageBase64 != null -> {
+                        val bitmap = base64ToBitmap(imageBase64!!)
+                        bitmap?.asImageBitmap()?.let { androidx.compose.ui.graphics.painter.BitmapPainter(it) }
+                            ?: painterResource(R.drawable.health_plus)
+                    }
+                    else -> painterResource(R.drawable.health_plus) // Default image
+                },
                 contentDescription = "Profile",
                 modifier = Modifier
                     .size(96.dp)
@@ -207,11 +220,49 @@ fun ProfileScreen(navController: NavController = NavController(LocalContext.curr
 
         Button(
             onClick = {
-                saveUserProfile(
-                    fullName, phoneNumber, email, selectedAccountType,
-                    imageUri.toString(), context
-                )
-                navController.navigate(ScreensName.WeightPickerScreen.name)
+                coroutineScope.launch {
+                    try {
+                        // Convert selected image to Base64
+                        val imageBase64String = selectedImageUri?.let { uri ->
+                            uriToBase64(context, uri)
+                        } ?: imageBase64
+
+                        // Prepare user data for Firestore
+                        val userData = mapOf(
+                            SharedPrefManager.NAME to fullName,
+                            SharedPrefManager.PHONE to phoneNumber,
+                            SharedPrefManager.EMAIL to email,
+                            SharedPrefManager.ACCOUNT_TYPE to selectedAccountType,
+                            SharedPrefManager.PHOTO_URL to (imageBase64String ?: "")
+                        )
+
+                        // Update Firebase Auth profile (display name only)
+                        val profileUpdates = userProfileChangeRequest {
+                            displayName = fullName
+                        }
+                        user.updateProfile(profileUpdates).await()
+
+                        // Save user data to Firestore
+                        saveUserData(
+                            data = userData,
+                            onSuccess = {
+                                // Update imageBase64 to display the uploaded image immediately
+                                if (imageBase64String != null) {
+                                    imageBase64 = imageBase64String
+                                    selectedImageUri = null // Clear local image
+                                }
+                                Toast.makeText(context, "Profile updated successfully!", Toast.LENGTH_SHORT).show()
+                                // Navigate to WeightPickerScreen
+                                navController.navigate(ScreensName.WeightPickerScreen.name)
+                            },
+                            onError = { e ->
+                                Toast.makeText(context, "Failed to save profile: ${e.message}", Toast.LENGTH_SHORT).show()
+                            }
+                        )
+                    } catch (e: Exception) {
+                        Toast.makeText(context, "Error processing image: ${e.message}", Toast.LENGTH_SHORT).show()
+                    }
+                }
             },
             modifier = Modifier
                 .fillMaxWidth()
@@ -247,52 +298,42 @@ fun ProfileScreen(navController: NavController = NavController(LocalContext.curr
     }
 }
 
-fun saveUserProfile(
-    fullName: String,
-    phoneNumber: String,
-    email: String,
-    accountType: String,
-    imageUrl: String?,
-    context: Context
+// Helper function to convert Uri to Base64 string
+fun uriToBase64(context: Context, uri: Uri): String {
+    val inputStream = context.contentResolver.openInputStream(uri)
+    val bitmap = BitmapFactory.decodeStream(inputStream)
+    inputStream?.close()
+
+    // Compress bitmap to reduce size
+    val outputStream = ByteArrayOutputStream()
+    bitmap.compress(Bitmap.CompressFormat.JPEG, 80, outputStream)
+    val byteArray = outputStream.toByteArray()
+    return Base64.encodeToString(byteArray, Base64.DEFAULT)
+}
+
+// Helper function to convert Base64 string to Bitmap
+fun base64ToBitmap(base64: String): Bitmap? {
+    return try {
+        val decodedBytes = Base64.decode(base64, Base64.DEFAULT)
+        BitmapFactory.decodeByteArray(decodedBytes, 0, decodedBytes.size)
+    } catch (e: Exception) {
+        null
+    }
+}
+
+fun saveUserData(
+    data: Map<String, Any>,
+    onSuccess: () -> Unit,
+    onError: (e: Exception) -> Unit
 ) {
-    val user = FirebaseAuth.getInstance().currentUser
+    val userId = FirebaseAuth.getInstance().currentUser?.uid ?: return
     val db = Firebase.firestore
-
-    val userId = user?.uid ?: run {
-        Toast.makeText(context, "Some error occurred", Toast.LENGTH_SHORT).show()
-        return
-    }
-
-    val userData = hashMapOf(
-        SharedPrefManager.NAME to fullName,
-        SharedPrefManager.PHONE to phoneNumber,
-        SharedPrefManager.EMAIL to email,
-        SharedPrefManager.ACCOUNT_TYPE to accountType,
-        SharedPrefManager.PHOTO_URL to (imageUrl ?: "")
-    )
-
-    // Update Auth display name
-    val profileUpdates = userProfileChangeRequest {
-        displayName = fullName
-        if (!imageUrl.isNullOrEmpty()) {
-            photoUri = Uri.parse(imageUrl)
+    db.collection("users").document(userId)
+        .update(data)
+        .addOnSuccessListener {
+            onSuccess()
         }
-    }
-
-    user.updateProfile(profileUpdates)
-        .addOnCompleteListener { task ->
-            if (task.isSuccessful) {
-                // Save to Firestore
-                db.collection("users").document(userId)
-                    .set(userData)
-                    .addOnSuccessListener {
-                        Toast.makeText(context, "Profile updated successfully!", Toast.LENGTH_SHORT).show()
-                    }
-                    .addOnFailureListener {
-                        Toast.makeText(context, "Failed to save profile: ${it.message}", Toast.LENGTH_SHORT).show()
-                    }
-            } else {
-                Toast.makeText(context, "Failed to update auth profile", Toast.LENGTH_SHORT).show()
-            }
+        .addOnFailureListener {
+            onError(it)
         }
 }
