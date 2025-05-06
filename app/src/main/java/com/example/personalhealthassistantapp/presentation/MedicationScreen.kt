@@ -49,6 +49,7 @@ import androidx.compose.ui.unit.sp
 import androidx.navigation.NavController
 import com.example.personalhealthassistantapp.R
 import com.example.personalhealthassistantapp.data.model.Medication
+import com.example.personalhealthassistantapp.data.model.SortedMedicationHistoryModel
 import com.example.personalhealthassistantapp.presentation.viewmodel.DataBaseViewModel
 import com.example.personalhealthassistantapp.utility.Utils
 import kotlinx.coroutines.CoroutineScope
@@ -67,6 +68,7 @@ fun MyMedicationsScreen(
 ) {
     val selectedDate = remember { mutableStateOf(LocalDate.now()) }
     var medicationList = remember { mutableStateOf<List<Medication>>(emptyList()) }
+    val medicationHistory = remember { mutableStateOf<List<SortedMedicationHistoryModel>>(emptyList()) }
 
     LaunchedEffect(Unit) {
         medicationList.value = dataBaseViewModel.getAllMedication()

@@ -2,7 +2,6 @@ package com.example.personalhealthassistantapp.data.model
 
 import androidx.room.Entity
 import androidx.room.PrimaryKey
-import java.time.LocalTime
 
 @Entity("medication")
 data class Medication(
@@ -14,6 +13,6 @@ data class Medication(
     val endDate: String?= "",
     val mealTiming: String?= "",
     val checked: Boolean?= false,
-    val time: String?= null
+    val time: List<String>?= null
 )
 
