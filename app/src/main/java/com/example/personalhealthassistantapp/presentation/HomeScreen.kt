@@ -2,6 +2,10 @@ package com.example.personalhealthassistantapp.presentation
 
 import android.annotation.SuppressLint
 import android.content.Context
+import android.graphics.Bitmap
+import android.graphics.BitmapFactory
+import android.util.Base64
+import android.widget.Toast
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
@@ -16,11 +20,15 @@ import androidx.compose.material.icons.filled.Search
 import androidx.compose.material3.*
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.*
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.asImageBitmap
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.colorResource
@@ -35,6 +43,8 @@ import com.example.personalhealthassistantapp.presentation.viewmodel.ChatViewMod
 import com.example.personalhealthassistantapp.utility.SharedPrefManager
 import com.example.personalhealthassistantapp.utility.Utils.getGreeting
 import com.google.firebase.auth.FirebaseAuth
+import com.google.firebase.firestore.ktx.firestore
+import com.google.firebase.ktx.Firebase
 import kotlin.random.Random
 
 @SuppressLint("StateFlowValueCalledInComposition")
@@ -71,11 +81,30 @@ fun HomeScreen(navController: NavController,  chatViewModel: ChatViewModel) {
     }
 }
 
+
 @Composable
 fun TopBarSection(navController: NavController) {
+    val context = LocalContext.current
     val user = FirebaseAuth.getInstance().currentUser
     val displayName = user?.displayName ?: "User"
-    val photoUrl = user?.photoUrl
+    val userId = user?.uid ?: return
+    val db = Firebase.firestore
+
+    // State for profile image
+    var imageBase64 by remember { mutableStateOf<String?>(null) }
+
+    // Fetch user data from Firestore
+    LaunchedEffect(Unit) {
+        db.collection("users").document(userId).get()
+            .addOnSuccessListener { document ->
+                if (document.exists()) {
+                    imageBase64 = document.getString("photoUrl")
+                }
+            }
+            .addOnFailureListener {
+                Toast.makeText(context, "Error fetching profile image", Toast.LENGTH_SHORT).show()
+            }
+    }
 
     Column {
         Row(
@@ -93,15 +122,20 @@ fun TopBarSection(navController: NavController) {
                         .clip(CircleShape)
                         .background(Color.Gray)
                 ) {
-                    photoUrl?.let {
-                        AsyncImage(
-                            model = it,
-                            contentDescription = "Profile Image",
-                            modifier = Modifier
-                                .fillMaxSize()
-                                .clip(CircleShape)
-                        )
-                    }
+                    Image(
+                        painter = when {
+                            imageBase64 != null -> {
+                                val bitmap = base64ToBitmap(imageBase64!!)
+                                bitmap?.asImageBitmap()?.let { androidx.compose.ui.graphics.painter.BitmapPainter(it) }
+                                    ?: painterResource(R.drawable.health_plus)
+                            }
+                            else -> painterResource(R.drawable.health_plus)
+                        },
+                        contentDescription = "Profile Image",
+                        modifier = Modifier
+                            .fillMaxSize()
+                            .clip(CircleShape)
+                    )
                 }
                 Spacer(modifier = Modifier.width(8.dp))
                 Column {
@@ -109,9 +143,13 @@ fun TopBarSection(navController: NavController) {
                     Text(getGreeting(), style = MaterialTheme.typography.bodySmall)
                 }
             }
-            Icon(Icons.Default.Notifications, contentDescription = null, modifier = Modifier.clickable {
-                navController.navigate(ScreensName.NotificationSetting.name)
-            })
+            Icon(
+                Icons.Default.Notifications,
+                contentDescription = null,
+                modifier = Modifier.clickable {
+                    navController.navigate(ScreensName.NotificationSetting.name)
+                }
+            )
         }
 
         Spacer(modifier = Modifier.height(12.dp))
@@ -124,6 +162,16 @@ fun TopBarSection(navController: NavController) {
             shape = RoundedCornerShape(16.dp),
             colors = OutlinedTextFieldDefaults.colors()
         )
+    }
+
+    // Helper function to convert Base64 string to Bitmap
+    fun base64ToBitmap(base64: String): Bitmap? {
+        return try {
+            val decodedBytes = Base64.decode(base64, Base64.DEFAULT)
+            BitmapFactory.decodeByteArray(decodedBytes, 0, decodedBytes.size)
+        } catch (e: Exception) {
+            null
+        }
     }
 }
 
