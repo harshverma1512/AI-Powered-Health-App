@@ -2,6 +2,7 @@ package com.example.personalhealthassistantapp.data.model
 
 import androidx.room.Entity
 import androidx.room.PrimaryKey
+import java.time.LocalTime
 
 @Entity("medication")
 data class Medication(

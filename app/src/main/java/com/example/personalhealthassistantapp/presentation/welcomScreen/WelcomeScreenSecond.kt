@@ -18,6 +18,7 @@ import androidx.compose.foundation.layout.wrapContentHeight
 import androidx.compose.foundation.layout.wrapContentWidth
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.LinearProgressIndicator
+import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
@@ -70,81 +71,85 @@ fun WelcomeScreenSecond(modifier: Modifier = Modifier, navController: NavControl
         mutableIntStateOf(0)
     }
 
-    if (whichScreen.intValue <= 4) {
-        Column(
-            modifier
-                .fillMaxSize()
-                .padding(top = 30.dp)
-        ) {
+    Scaffold { innerPadding ->
 
-            Row(
-                modifier = modifier
-                    .padding(horizontal = 10.dp, vertical = 15.dp)
-                    .fillMaxWidth(),
-                horizontalArrangement = Arrangement.SpaceBetween
+        if (whichScreen.intValue <= 4) {
+            Column(
+                modifier
+                    .fillMaxSize()
+                    .padding(innerPadding)
             ) {
-                ProgressWithSkip(navController)
-            }
 
-            Text(
-                text = list[whichScreen.intValue],
-                fontWeight = FontWeight.Bold,
-                fontSize = 32.sp,
-                color = Color.Black,
-                style = TextStyle(lineHeight = 40.sp),
-                modifier = Modifier.padding(horizontal = 10.dp)
-            )
+                Row(
+                    modifier = modifier
+                        .padding(horizontal = 10.dp, vertical = 15.dp)
+                        .fillMaxWidth(),
+                    horizontalArrangement = Arrangement.SpaceBetween
+                ) {
+                    ProgressWithSkip(navController)
+                }
 
-            Spacer(modifier = modifier.height(10.dp))
-
-            Text(
-                text = list2[whichScreen.value],
-                fontSize = 18.sp,
-                color = Color.Gray,
-                style = TextStyle(lineHeight = 20.sp),
-                modifier = Modifier.padding(horizontal = 10.dp)
-            )
-
-            Spacer(modifier = modifier.weight(1f)) // Push everything up
-
-            Box(
-                modifier = modifier.fillMaxWidth()
-            ) {
-                Image(
-                    painter = painterResource(id = imageList[whichScreen.intValue]),
-                    contentDescription = "welcomeScreen Image",
-                    modifier = Modifier.wrapContentHeight()
+                Text(
+                    text = list[whichScreen.intValue],
+                    fontWeight = FontWeight.Bold,
+                    fontSize = 32.sp,
+                    color = Color.Black,
+                    style = TextStyle(lineHeight = 40.sp),
+                    modifier = Modifier.padding(horizontal = 10.dp)
                 )
 
+                Spacer(modifier = modifier.height(10.dp))
+
+                Text(
+                    text = list2[whichScreen.value],
+                    fontSize = 18.sp,
+                    color = Color.Gray,
+                    style = TextStyle(lineHeight = 20.sp),
+                    modifier = Modifier.padding(horizontal = 10.dp)
+                )
+
+                Spacer(modifier = modifier.weight(1f)) // Push everything up
+
                 Box(
-                    modifier = modifier
-                        .padding(20.dp)
-                        .align(Alignment.BottomEnd)
+                    modifier = modifier.fillMaxWidth()
                 ) {
-                    Row(
+                    Image(
+                        painter = painterResource(id = imageList[whichScreen.intValue]),
+                        contentDescription = "welcomeScreen Image",
+                        modifier = Modifier.wrapContentHeight()
+                    )
+
+                    Box(
                         modifier = modifier
-                            .size(60.dp)
-                            .background(
-                                color = colorResource(id = R.color.welcome_box_color),
-                                shape = RoundedCornerShape(10.dp)
-                            )
+                            .padding(20.dp)
+                            .align(Alignment.BottomEnd)
                     ) {
-                        Image(painter = painterResource(id = R.drawable.monotone_arrow_right_md),
-                            contentDescription = "moving forward",
+                        Row(
                             modifier = modifier
-                                .align(Alignment.CenterVertically)
-                                .fillMaxWidth()
-                                .clickable {
-                                    if (whichScreen.intValue == 4) {
-                                        navController.navigate(ScreensName.LoginScreen.name){
-                                            popUpTo(ScreensName.WelcomeScreen.name){
-                                                inclusive = true
+                                .size(60.dp)
+                                .background(
+                                    color = colorResource(id = R.color.welcome_box_color),
+                                    shape = RoundedCornerShape(10.dp)
+                                )
+                        ) {
+                            Image(
+                                painter = painterResource(id = R.drawable.monotone_arrow_right_md),
+                                contentDescription = "moving forward",
+                                modifier = modifier
+                                    .align(Alignment.CenterVertically)
+                                    .fillMaxWidth()
+                                    .clickable {
+                                        if (whichScreen.intValue == 4) {
+                                            navController.navigate(ScreensName.LoginScreen.name) {
+                                                popUpTo(ScreensName.WelcomeScreen.name) {
+                                                    inclusive = true
+                                                }
                                             }
+                                        } else {
+                                            whichScreen.intValue += 1
                                         }
-                                    } else {
-                                        whichScreen.intValue += 1
-                                    }
-                                })
+                                    })
+                        }
                     }
                 }
             }

@@ -24,17 +24,17 @@ class BootReceiver : BroadcastReceiver() {
             val sleepTime = sharedPrefManager.getSleepTime()
             val wakeUpTime = sharedPrefManager.getWakeupTime()
             Log.d("BootReceiver", "Sleep time: $sleepDate $sleepTime")
-            if (sleepDate?.isNotEmpty() == true && sleepTime?.isNotEmpty() == true) {
-                val sleepDateTime =
-                    LocalDateTime.of(LocalDate.parse(sleepDate), LocalTime.parse(sleepTime))
-                val wakeUpDateTime =
-                    LocalDateTime.of(LocalDate.parse(sleepDate), LocalTime.parse(wakeUpTime))
-                alarmScheduler.schedule(AlarmModel(sleepDateTime, "Sleep Time"))
-                alarmScheduler.schedule(AlarmModel(wakeUpDateTime, "Wakeup Time"))
-            }
-            if (SharedPrefManager(context).getHydrationNotify()){
-                alarmScheduler.hydrationSchedule(3)
-            }
+//            if (sleepDate?.isNotEmpty() == true && sleepTime?.isNotEmpty() == true) {
+//                val sleepDateTime =
+//                    LocalDateTime.of(LocalDate.parse(sleepDate), LocalTime.parse(sleepTime))
+//                val wakeUpDateTime =
+//                    LocalDateTime.of(LocalDate.parse(sleepDate), LocalTime.parse(wakeUpTime))
+//                alarmScheduler.schedule(AlarmModel(sleepDateTime, "Sleep Time"))
+//                alarmScheduler.schedule(AlarmModel(wakeUpDateTime, "Wakeup Time"))
+//            }
+//            if (SharedPrefManager(context).getHydrationNotify()){
+//                alarmScheduler.hydrationSchedule(3)
+//            }
         }
     }
 }

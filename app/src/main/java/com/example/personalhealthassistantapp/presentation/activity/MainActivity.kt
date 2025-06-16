@@ -57,7 +57,7 @@ class MainActivity : ComponentActivity() {
         enableEdgeToEdge()
 
         setContent {
-            val viewModel = hiltViewModel<ChatViewModel>()
+                val viewModel = hiltViewModel<ChatViewModel>()
             val dataBaseViewModel = hiltViewModel<DataBaseViewModel>()
             PersonalHealthAssistantAppTheme {
 

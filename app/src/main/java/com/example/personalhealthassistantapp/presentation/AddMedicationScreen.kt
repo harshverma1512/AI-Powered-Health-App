@@ -1,5 +1,8 @@
 package com.example.personalhealthassistantapp.presentation
 
+import android.app.TimePickerDialog
+import android.util.Log
+import android.widget.Toast
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
@@ -49,7 +52,12 @@ import java.time.LocalDate
 import java.time.format.DateTimeFormatter
 import androidx.compose.material3.*
 import androidx.compose.foundation.*
+import androidx.compose.foundation.gestures.detectTapGestures
+import androidx.compose.foundation.interaction.MutableInteractionSource
 import androidx.compose.foundation.layout.Box
+import androidx.compose.material.icons.filled.Clear
+import androidx.compose.material.icons.filled.DateRange
+import androidx.compose.ui.input.pointer.pointerInput
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.unit.*
@@ -82,6 +90,8 @@ fun AddMedicationScreen(
     var autoReminder by remember { mutableStateOf(SharedPrefManager(context).getMedicalAssistantNotify()) }
     val formatter = DateTimeFormatter.ofPattern("MMM dd")
     val frequencies = listOf("Once Daily", "Twice Daily", "3x Per Week", "Every Other Day")
+    var reminderTimes by remember { mutableStateOf(mutableListOf<String>()) }
+
 
     Scaffold {
         Column(
@@ -135,6 +145,25 @@ fun AddMedicationScreen(
             }
 
             Spacer(Modifier.height(16.dp))
+
+            ReminderTimesSection(
+                reminderTimes = reminderTimes,
+                onAddClick = {
+                    if (reminderTimes.size < 3) {
+                        reminderTimes = (reminderTimes + LocalTime.now().toString()).toMutableList()
+                    }
+                },
+                onRemoveClick = {
+                    if (reminderTimes.isNotEmpty()) {
+                        reminderTimes = reminderTimes.dropLast(1).toMutableList()
+                    }
+                },
+                onTimeClick = { time ->
+                    reminderTimes.add(time)
+                }
+            )
+            Spacer(Modifier.height(16.dp))
+
             MedicationDurationSection(startDate, endDate, onStartDateClick = {
                 showStartPicker = true
             }, onEndDateClick = {
@@ -192,13 +221,14 @@ fun AddMedicationScreen(
                     CoroutineScope(Dispatchers.IO).launch {
                         dataBaseViewModel.insertMedication(Medication(0, name, customInstruction,frequency,
                             startDate.toString(),
-                            endDate.toString(), mealTiming, false))
+                            endDate.toString(), mealTiming, false , reminderTimes))
                     }
                     SharedPrefManager(context = context).setMedication(true)
                     navController.popBackStack()
                 },
                 modifier = Modifier
-                    .fillMaxWidth().padding(7.dp)
+                    .fillMaxWidth()
+                    .padding(7.dp)
                     .height(56.dp),
                 colors = ButtonDefaults.buttonColors(containerColor = Color(0xFF007AFF))
             ) {
@@ -407,3 +437,39 @@ fun MealOptionButton(
         }
     }
 }
+
+@Composable
+fun ReminderTimesSection(
+    reminderTimes: List<String>,
+    onAddClick: () -> Unit,
+    onRemoveClick: () -> Unit,
+    onTimeClick: (String) -> Unit
+) {
+    Column {
+        Row(verticalAlignment = Alignment.CenterVertically , modifier = Modifier.fillMaxWidth() , horizontalArrangement = Arrangement.SpaceBetween) {
+            Text("Reminder Times", fontWeight = FontWeight.Bold, color = Color(0xFF1B2A4E))
+
+            IconButton(onClick = {
+                if (reminderTimes.size < 3) onAddClick() else onRemoveClick()
+            }) {
+                Icon(
+                    imageVector = if (reminderTimes.size < 3) Icons.Default.Add else Icons.Default.Clear,
+                    contentDescription = if (reminderTimes.size < 3) "Add Time" else "Remove Time",
+                    tint = Color(0xFF007AFF)
+                )
+            }
+        }
+        Spacer(Modifier.height(8.dp))
+
+        reminderTimes.forEachIndexed { index, time ->
+
+            TimePickerItem("Medication Time $index", LocalTime.now()) { selected ->
+                onTimeClick(selected.toString())
+            }
+
+            Spacer(modifier = Modifier.height(8.dp))
+        }
+
+    }
+}
+
