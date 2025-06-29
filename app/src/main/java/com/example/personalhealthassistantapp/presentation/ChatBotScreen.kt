@@ -5,8 +5,10 @@ import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.layout.wrapContentWidth
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.shape.RoundedCornerShape
@@ -129,15 +131,15 @@ fun MessageInput(sendMessage: (String) -> Unit) {
 
 @Composable
 fun ChatBoxHeader(modifier: Modifier = Modifier, navController: NavController) {
-    Box(
+    Row(
         modifier
             .fillMaxWidth()
-            .background(color = colorResource(id = R.color.btn_color)),
-        contentAlignment = Alignment.CenterStart
+            .background(color = colorResource(id = R.color.btn_color)), verticalAlignment = Alignment.CenterVertically
     ) {
         Utils.BackBtn {
             navController.popBackStack()
         }
+        Spacer(modifier.width(16.dp))
 
         Text(
             text = "Your Assistance",

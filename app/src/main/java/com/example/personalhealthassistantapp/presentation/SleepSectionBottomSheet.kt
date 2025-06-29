@@ -321,8 +321,9 @@ fun FilterSleepSheetContent(onDismiss: (SleepHistoryModel) -> Unit) {
         Button(
             onClick = {
                 val sharedPrefManager = SharedPrefManager(context)
-                sharedPrefManager.saveSleepTime(sleepTime.hour, sleepTime.minute)
-                sharedPrefManager.saveWakeTime(wakeTime.hour, wakeTime.minute)
+                sharedPrefManager.saveSleepDay(sleepDate)
+                sharedPrefManager.saveSleepTime(sleepTime)
+                sharedPrefManager.saveWakeTime(wakeTime)
 
                 alarmScheduler.schedule(AlarmModel(LocalDateTime.of(sleepDate, sleepTime), "Sleeping Time"))
                 alarmScheduler.schedule(AlarmModel(LocalDateTime.of(sleepDate, wakeTime), "WakeUp Time"))

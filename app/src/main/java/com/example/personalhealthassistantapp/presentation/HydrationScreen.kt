@@ -1,5 +1,6 @@
 package com.example.personalhealthassistantapp.presentation
 
+import android.widget.Toast
 import androidx.compose.foundation.Canvas
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
@@ -47,6 +48,7 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.navigation.NavController
 import com.example.personalhealthassistantapp.R
+import com.example.personalhealthassistantapp.domain.repository.AndroidAlarmScheduler
 import com.example.personalhealthassistantapp.utility.SharedPrefManager
 import com.example.personalhealthassistantapp.utility.Utils
 
@@ -60,7 +62,7 @@ fun HydrationRecord(modifier: Modifier = Modifier, navController: NavController)
                 .fillMaxSize()
                 .verticalScroll(rememberScrollState())
                 .background(color = colorResource(id = R.color.white))
-                .padding(14.dp)
+                .padding(14.dp), horizontalAlignment = Alignment.CenterHorizontally
         ) {
             Row(
                 verticalAlignment = Alignment.CenterVertically, modifier = Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.SpaceBetween
@@ -87,7 +89,7 @@ fun HydrationRecord(modifier: Modifier = Modifier, navController: NavController)
                 painter = painterResource(id = R.drawable.water_goal),
                 contentDescription = "",
                 modifier = Modifier
-                    .fillMaxWidth()
+                    .width(300.dp)
                     .height(LocalConfiguration.current.screenHeightDp.dp * 0.4f),
                 contentScale = ContentScale.Crop
             )
@@ -95,25 +97,28 @@ fun HydrationRecord(modifier: Modifier = Modifier, navController: NavController)
             Spacer(modifier = Modifier.height(10.dp))
 
             HalfCircularWaterTracker(
-                currentIntake = SharedPrefManager(context = navController.context).getWaterTake(),
-                goal = SharedPrefManager(navController.context).getWaterGoal()
+                currentIntake = SharedPrefManager(context = navController.context).getWaterTake().toFloat(),
+                goal = convertToMilliliters(
+                    SharedPrefManager(navController.context).getWaterGoal().toFloat(),
+                    SharedPrefManager(navController.context).getWaterUnit()
+                ).toFloat()
             )
-
         }
     }
 }
 
 @Composable
 fun HalfCircularWaterTracker(
-    currentIntake: Int = 0,
-    goal: Int,
+    currentIntake: Float,
+    goal: Float,
     modifier: Modifier = Modifier
 ) {
     val context = LocalContext.current
     var showDialog by remember { mutableStateOf(false) }
-    var currentIntake by remember { mutableIntStateOf(currentIntake) }
+    var currentIntake by remember { mutableStateOf(currentIntake) }
     val unit = SharedPrefManager(context).getWaterUnit() ?: "mL"
-    val progress = currentIntake.toFloat() / convertToMilliliters(goal.toFloat(), unit)
+    val progress = currentIntake / goal
+    val alarmScheduler = AndroidAlarmScheduler(context)
 
     Box(
         contentAlignment = Alignment.Center,
@@ -196,10 +201,34 @@ fun HalfCircularWaterTracker(
                             }
 
                             currentIntake += addedAmount
-                            SharedPrefManager(context).saveWaterTake(currentIntake)
+                            SharedPrefManager(context).saveWaterTake(currentIntake.toInt())
+
+                            if (!SharedPrefManager(context).getHydrationNotify()){
+                                alarmScheduler.hydrationSchedule(3)
+                                SharedPrefManager(context).saveHydrationNotify(true)
+                                Toast.makeText(
+                                    context,
+                                    "We will notify you every 3 hours to drink water.",
+                                    Toast.LENGTH_LONG
+                                ).show()
+                            }
 
                             if (currentIntake >= goal) {
                                 showDialog = true
+                            }
+                        }else{
+                            if (currentIntake == 0f){
+                                Toast.makeText(
+                                    context,
+                                    "You have not set a goal",
+                                    Toast.LENGTH_SHORT
+                                ).show()
+                            }else{
+                                Toast.makeText(
+                                    context,
+                                    "You have reached your goal",
+                                    Toast.LENGTH_SHORT
+                                ).show()
                             }
                         }
                     },
@@ -232,7 +261,7 @@ fun HalfCircularWaterTracker(
         AlertDialog(
             onDismissRequest = { showDialog = false },
             title = { Text(text = "Congratulations!") },
-            text = { Text(text = "Water Intake Full 🎉") },
+            text = { Text(text = "Water Intake Full, Keep it Up!") },
             confirmButton = {
                 Button(
                     onClick = { showDialog = false }

@@ -38,11 +38,13 @@ class ChatViewModel @Inject constructor() : ViewModel() {
             userData = it
             Log.d("checkUserData", it.toString())
             userData?.let {
-                viewModelScope.launch {
-                    val bmi = calculateBMI(userData?.get(SharedPrefManager.WEIGHT) as Long,
-                        userData?.get(SharedPrefManager.WEIGHT_MEASUREMENT) as String,
-                        userData?.get(SharedPrefManager.HEIGHT) as Long)
-                    score = bmi.toInt()
+                if (userData?.get(SharedPrefManager.WEIGHT) != null && userData?.get(SharedPrefManager.HEIGHT) != null){
+                    viewModelScope.launch {
+                        val bmi = calculateBMI(userData?.get(SharedPrefManager.WEIGHT) as Long,
+                            userData?.get(SharedPrefManager.WEIGHT_MEASUREMENT) as String,
+                            userData?.get(SharedPrefManager.HEIGHT) as Long)
+                        score = bmi.toInt()
+                    }
                 }
             }
         }, onError = {
@@ -66,14 +68,14 @@ class ChatViewModel @Inject constructor() : ViewModel() {
     }
 
     private fun calculateBMI(
-        weight: Long = "0".toLong(), weightUnit: String = "Kg", heightCm: Long = "0".toLong()
+        weight: Long = 0, weightUnit: String = "Kg", heightCm: Long = 0
     ): Double {
         val weightInKg = if (weightUnit.lowercase() == "lbs") {
             weight.toDouble() * 0.453592
         } else {
             weight.toDouble()
         }
-        val heightInMeters = heightCm / 100
+        val heightInMeters = heightCm.toDouble() / 100
 
         return (weightInKg / (heightInMeters * heightInMeters)).roundTo(2)
     }

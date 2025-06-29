@@ -6,5 +6,7 @@ interface AlarmScheduler {
 
     fun schedule(time: AlarmModel)
     fun cancel(time: AlarmModel)
+    fun hydrationSchedule(hour : Int)
+    fun medicationSchedule()
 
 }

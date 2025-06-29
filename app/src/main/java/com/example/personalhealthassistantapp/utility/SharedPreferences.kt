@@ -5,6 +5,8 @@ import android.content.Context
 import androidx.core.content.edit
 import java.time.DayOfWeek
 import java.time.LocalDate
+import java.time.LocalDateTime
+import java.time.LocalTime
 
 class SharedPrefManager(context: Context) {
 
@@ -25,60 +27,71 @@ class SharedPrefManager(context: Context) {
         const val WEIGHT = "weight"
         const val WEIGHT_MEASUREMENT = "weight_measurement"
         const val HEIGHT = "height"
-        const val HEALTH_NOTIFY = "health_notify"
-        const val HEALTH_ASSISTANT_NOTIFY = "health_assistant_notify"
+        const val HYDRATION_NOTIFY = "hydration_notify"
+        const val MEDICATION_ASSISTANT_NOTIFY = "medication_assistant_notify"
+        const val MEDICATION_SELECTED = "medication_selected"
 
         // Alarm keys
-        const val KEY_SLEEP_HOUR = "sleep_hour"
-        const val KEY_SLEEP_MIN = "sleep_min"
-        const val KEY_WAKE_HOUR = "wake_hour"
-        const val KEY_WAKE_MIN = "wake_min"
+        const val KEY_SLEEP_TIME = "sleep_hour_time"
+        const val KEY_WAKE_TIME = "wake_hour_time"
+        const val SLEEP_SCHEDULE = "sleep_schedule"
         const val SELECTED_DAYS = "selected_days"
+        const val SLEEP_DAY = "sleep_day"
 
         //Water Take
         const val WATER_TAKE = "water_take"
         const val WATER_GOAL = "water_goal"
         const val WATER_UNIT = "water_unit"
+        const val HYDRATION_SCHEDULE = "hydration_schedule"
         const val TODAY = "today"
 
     }
 
-    fun saveSleepTime(hour: Int, minute: Int) {
+    fun saveSleepTime(time: LocalTime) {
         sharedPref.edit {
-            putInt(KEY_SLEEP_HOUR, hour)
-            putInt(KEY_SLEEP_MIN, minute)
+            putString(KEY_SLEEP_TIME, time.toString())
         }
     }
 
-    fun getSleepHour(): Int = sharedPref.getInt(KEY_SLEEP_HOUR, 22)
-    fun getSleepMinute(): Int = sharedPref.getInt(KEY_SLEEP_MIN, 0)
-    fun getWakeHour(): Int = sharedPref.getInt(KEY_WAKE_HOUR, 6)
-    fun getWakeMinute(): Int = sharedPref.getInt(KEY_WAKE_MIN, 0)
+    fun getSleepTime() : String? = sharedPref.getString(KEY_SLEEP_TIME, "")
+    fun getWakeupTime() : String? = sharedPref.getString(KEY_WAKE_TIME, "")
+    fun getSleepDate() : String?= sharedPref.getString(SLEEP_DAY, "")
     fun getWaterTake(): Int = sharedPref.getInt(WATER_TAKE, 0)
     fun getWaterGoal(): Int = sharedPref.getInt(WATER_GOAL, 0)
-    fun getWaterUnit() : String = sharedPref.getString("water_unit", "ml") ?: "ml"
+    fun getWaterUnit() : String = sharedPref.getString(WATER_UNIT, "ml") ?: "ml"
     fun getToday() : String = sharedPref.getString(TODAY, LocalDate.now().toString()) ?: LocalDate.now().toString()
-    fun getHealthNotify() : Boolean = sharedPref.getBoolean(HEALTH_NOTIFY, true)
-    fun getHealthAssistantNotify() : Boolean = sharedPref.getBoolean(HEALTH_ASSISTANT_NOTIFY, false)
+    fun getHydrationNotify() : Boolean = sharedPref.getBoolean(HYDRATION_NOTIFY, false)
+    fun getMedicalAssistantNotify() : Boolean = sharedPref.getBoolean(MEDICATION_ASSISTANT_NOTIFY, false)
+    fun isMedication(): Boolean = sharedPref.getBoolean(MEDICATION_SELECTED, false)
 
-    fun saveWakeTime(hour: Int, minute: Int) {
-        sharedPref.edit {
-            putInt(KEY_WAKE_HOUR, hour)
-            putInt(KEY_WAKE_MIN, minute)
+    fun setMedication(isMedicationSelected : Boolean){
+        sharedPref.edit(){
+            putBoolean(MEDICATION_SELECTED, isMedicationSelected)
         }
     }
 
-    fun saveHealthNotify(healthNotify: Boolean) {
-        sharedPref.edit {
-            putBoolean(HEALTH_NOTIFY, healthNotify)
+    fun saveSleepDay(localTime: LocalDate){
+        sharedPref.edit(){
+            putString(SLEEP_DAY, localTime.toString())
         }
     }
 
-    fun saveHealthAssistantNotify(healthAssistantNotify: Boolean) {
+    fun saveWakeTime(time: LocalTime) {
         sharedPref.edit {
-            putBoolean(HEALTH_ASSISTANT_NOTIFY, healthAssistantNotify)
+            putString(KEY_WAKE_TIME, time.toString())
         }
     }
+
+    fun saveHydrationNotify(healthNotify: Boolean) {
+        sharedPref.edit {
+            putBoolean(HYDRATION_NOTIFY, healthNotify)
+        }
+    }
+
+    fun setAutoMedicationReminder(autoReminder: Boolean) {
+        sharedPref.edit() {putBoolean(MEDICATION_ASSISTANT_NOTIFY, autoReminder)}
+    }
+
 
     fun saveTodayDate(today: LocalDate?) {
         sharedPref.edit {

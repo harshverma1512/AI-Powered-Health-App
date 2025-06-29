@@ -43,19 +43,15 @@ import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.navigation.NavController
-import androidx.work.ExistingPeriodicWorkPolicy
-import androidx.work.PeriodicWorkRequestBuilder
-import androidx.work.WorkManager
-import com.example.personalhealthassistantapp.domain.services.ReminderWorker
+import com.example.personalhealthassistantapp.domain.repository.AndroidAlarmScheduler
 import com.example.personalhealthassistantapp.utility.SharedPrefManager
-import com.example.personalhealthassistantapp.utility.Utils.setHydrationReminderEnabled
-import java.util.concurrent.TimeUnit
 
 @Composable
 fun NotificationSetupScreen(navController: NavController) {
     val context = LocalContext.current
-    var healthInsights by remember { mutableStateOf(SharedPrefManager(context).getHealthNotify()) }
-    var medicationReminder by remember { mutableStateOf(SharedPrefManager(context).getHealthAssistantNotify()) }
+    var healthInsights by remember { mutableStateOf(SharedPrefManager(context).getHydrationNotify()) }
+    var medicationReminder by remember { mutableStateOf(SharedPrefManager(context).getMedicalAssistantNotify()) }
+    val alarmScheduler = AndroidAlarmScheduler(context)
 
     Scaffold { padding ->
         Column(
@@ -112,15 +108,15 @@ fun NotificationSetupScreen(navController: NavController) {
                         Toast.LENGTH_LONG
                     ).show()
                 }
-                setHydrationReminderEnabled(context,it)
+                alarmScheduler.hydrationSchedule(3)
                 healthInsights = it
-                SharedPrefManager(context).saveHealthNotify(it)
+                SharedPrefManager(context).saveHydrationNotify(it)
 
             }
             NotificationToggle(
                 "Medication Reminder", R.drawable.stop_notification, medicationReminder
             ) {
-                SharedPrefManager(context).saveHealthAssistantNotify(it)
+                SharedPrefManager(context).setAutoMedicationReminder(it)
                 medicationReminder = it
             }
             NotificationToggle("Sleep Alarm Reminder", R.drawable.sleep, true) {
