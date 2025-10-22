@@ -1,6 +1,7 @@
 package com.example.personalhealthassistantapp.presentation
 
 import android.content.Context
+import android.util.Log
 import android.widget.Toast
 import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.Image
@@ -141,6 +142,7 @@ fun LoginSignupScreen(
                 onValueChange = {
                     email.value = it
                 },
+                label = { Text("Email Address")},
                 shape = RoundedCornerShape(10.dp),
                 modifier = modifier
                     .fillMaxWidth()
@@ -187,6 +189,7 @@ fun LoginSignupScreen(
                     onValueChange = {
                         confirmPassword.value = it
                     },
+                    label = { Text("Confirm Password")},
                     modifier = modifier
                         .fillMaxWidth()
                         .background(color = Color.White),
@@ -370,6 +373,7 @@ private fun signup(
                 navController.navigate(ScreensName.ProfileScreen.name)
                 SharedPrefManager(context).saveLoginStatus(true)
             } else {
+                Log.d("failer Log", task.exception?.message!!)
                 Toast.makeText(context, "Signup Fail!", Toast.LENGTH_SHORT).show()
             }
         }
