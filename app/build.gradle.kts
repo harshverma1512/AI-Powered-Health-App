@@ -5,6 +5,7 @@ plugins {
     id("com.google.dagger.hilt.android") // Add Hilt plugin
     id("kotlin-kapt")
     id("com.google.gms.google-services")
+    id("com.google.firebase.crashlytics")
 }
 
 android {
@@ -83,6 +84,7 @@ dependencies {
     implementation(libs.firebase.auth.ktx)
     implementation(libs.google.firebase.storage.ktx)
     implementation(libs.firebase.firestore.ktx)
+    implementation(libs.firebase.crashlytics)
 
     //Worker
     implementation(libs.androidx.work.runtime.ktx)

@@ -102,8 +102,6 @@ fun MyMedicationsScreen(
 
             Spacer(modifier = Modifier.height(8.dp))
 
-
-
             Spacer(modifier = Modifier.height(16.dp))
 
             // Date row
