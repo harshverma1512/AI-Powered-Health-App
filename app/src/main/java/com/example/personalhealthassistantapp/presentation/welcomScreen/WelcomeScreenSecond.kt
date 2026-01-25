@@ -18,6 +18,7 @@ import androidx.compose.foundation.layout.wrapContentHeight
 import androidx.compose.foundation.layout.wrapContentWidth
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.LinearProgressIndicator
+import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
@@ -93,7 +94,7 @@ fun WelcomeScreenSecond(modifier: Modifier = Modifier, navController: NavControl
                     text = list[whichScreen.intValue],
                     fontWeight = FontWeight.Bold,
                     fontSize = 32.sp,
-                    color = Color.Black,
+                    color = MaterialTheme.colorScheme.primary,
                     style = TextStyle(lineHeight = 40.sp),
                     modifier = Modifier.padding(horizontal = 10.dp)
                 )
@@ -177,7 +178,7 @@ fun ProgressWithSkip(navController: NavController) {
                 modifier = Modifier
                     .fillMaxHeight()
                     .fillMaxWidth(0.4f) // 40% progress – adjust as needed
-                    .background(Color.Black)
+                    .background(MaterialTheme.colorScheme.primary)
             )
         }
 
@@ -185,7 +186,7 @@ fun ProgressWithSkip(navController: NavController) {
         Text(
             text = "Skip",
             modifier = Modifier.padding(start = 16.dp).clickable { navController.navigate(ScreensName.LoginScreen.name) },
-            color = Color(0xFF1A2334),
+            color = MaterialTheme.colorScheme.primary,
             fontSize = 16.sp,
             fontWeight = FontWeight.Medium
         )

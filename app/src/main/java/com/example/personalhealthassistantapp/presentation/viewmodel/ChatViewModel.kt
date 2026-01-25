@@ -13,6 +13,7 @@ import com.example.personalhealthassistantapp.data.model.MessageModel
 import com.example.personalhealthassistantapp.utility.SharedPrefManager
 import com.example.personalhealthassistantapp.utility.Utils
 import com.example.personalhealthassistantapp.utility.Utils.fetchCurrentUserData
+import com.google.ai.client.generativeai.BuildConfig
 import com.google.ai.client.generativeai.GenerativeModel
 import dagger.hilt.android.lifecycle.HiltViewModel
 import io.ktor.util.valuesOf
@@ -86,7 +87,10 @@ class ChatViewModel @Inject constructor() : ViewModel() {
             try {
                 val model = generativeModel
                 val chat = model.startChat()
-                val response = chat.sendMessage("I will provide you with a list of symptoms. Based on those, please suggest what possible sickness or condition I might have. Also, briefly explain why you think it's that sickness. Please keep your response under 250 words. Here are the symptoms: $symptoms")
+                val response = chat.sendMessage("I will provide you with a list of symptoms. " +
+                        "Based on those, please suggest what possible sickness or condition I might have. " +
+                        "Also, briefly explain why you think it's that sickness. Please keep your response under " +
+                        "250 words. Here are the symptoms: $symptoms")
                 Log.d("check disease", response.text.toString())
                 response.text?.let {
                     symptomsDiseaseResponse.value = it

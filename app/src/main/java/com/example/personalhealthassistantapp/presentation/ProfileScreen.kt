@@ -33,6 +33,7 @@ import androidx.compose.material.icons.filled.Edit
 import androidx.compose.material.icons.filled.Email
 import androidx.compose.material.icons.filled.Person
 import androidx.compose.material.icons.filled.Phone
+import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.ExposedDropdownMenuBox
@@ -40,6 +41,7 @@ import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.Text
+import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
@@ -57,7 +59,6 @@ import androidx.compose.ui.res.colorResource
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.input.KeyboardType
-import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.navigation.NavController
 import coil3.compose.rememberAsyncImagePainter
@@ -68,11 +69,9 @@ import com.google.firebase.auth.ktx.auth
 import com.google.firebase.auth.userProfileChangeRequest
 import com.google.firebase.firestore.ktx.firestore
 import com.google.firebase.ktx.Firebase
-import com.google.firebase.storage.FirebaseStorage
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.tasks.await
 import java.io.ByteArrayOutputStream
-import java.util.UUID
 
 @Composable
 fun ProfileScreen(navController: NavController) {
@@ -93,7 +92,13 @@ fun ProfileScreen(navController: NavController) {
     // Image picker launcher
     val launcher = rememberLauncherForActivityResult(ActivityResultContracts.GetContent()) { uri ->
         selectedImageUri = uri
+        // Clear the base64 string if a new image is selected
+        if (uri != null) {
+            imageBase64 = null
+        }
     }
+
+    var showDialog by remember { mutableStateOf(false) }
 
     // Fetch user data on start
     LaunchedEffect(Unit) {
@@ -102,18 +107,27 @@ fun ProfileScreen(navController: NavController) {
             email = it.email ?: ""
 
             // Load extended user info from Firestore
-            db.collection("users").document(userId).get()
-                .addOnSuccessListener { document ->
-                    if (document.exists()) {
-                        phoneNumber = document.getString("phone") ?: ""
-                        selectedAccountType = document.getString("accountType") ?: "Patient"
-                        imageBase64 = document.getString("photoUrl")
-                    }
+            db.collection("users").document(userId).get().addOnSuccessListener { document ->
+                if (document.exists()) {
+                    phoneNumber = document.getString("phone") ?: ""
+                    selectedAccountType = document.getString("accountType") ?: "Patient"
+                    imageBase64 = document.getString("photoUrl")
                 }
-                .addOnFailureListener {
-                    Toast.makeText(context, "Error fetching user data", Toast.LENGTH_SHORT).show()
-                }
+            }.addOnFailureListener {
+                Toast.makeText(context, "Error fetching user data", Toast.LENGTH_SHORT).show()
+            }
         }
+    }
+
+    if (showDialog) {
+        ImageSourceDialog(onDismiss = { showDialog = false }, onGalleryClick = {
+            showDialog = false
+            launcher.launch("image/*")
+        }, onAvatarClick = {
+            showDialog = false
+            selectedImageUri = null
+            // Convert drawable to Base64 and set it
+        })
     }
 
     Column(
@@ -131,24 +145,26 @@ fun ProfileScreen(navController: NavController) {
         Spacer(modifier = Modifier.height(16.dp))
 
         Box(contentAlignment = Alignment.Center, modifier = Modifier.clickable {
-            launcher.launch("image/*")
+            // open dialog ask go with avatar or system  images
+            showDialog = true
         }) {
             Image(
                 painter = when {
                     selectedImageUri != null -> rememberAsyncImagePainter(selectedImageUri)
                     imageBase64 != null -> {
                         val bitmap = base64ToBitmap(imageBase64!!)
-                        bitmap?.asImageBitmap()?.let { androidx.compose.ui.graphics.painter.BitmapPainter(it) }
+                        bitmap?.asImageBitmap()
+                            ?.let { androidx.compose.ui.graphics.painter.BitmapPainter(it) }
                             ?: painterResource(R.drawable.health_plus)
                     }
+
                     else -> painterResource(R.drawable.health_plus) // Default image
                 },
                 contentDescription = "Profile",
                 modifier = Modifier
                     .size(96.dp)
                     .clip(CircleShape)
-                    .border(2.dp, Color.White, CircleShape)
-            )
+                    .border(2.dp, Color.White, CircleShape))
             Icon(
                 imageVector = Icons.Default.Edit,
                 contentDescription = "Edit",
@@ -205,11 +221,9 @@ fun ProfileScreen(navController: NavController) {
             listOf("Regular", "Patient", "Physician").forEach { type ->
                 val isSelected = selectedAccountType == type
                 Button(
-                    onClick = { selectedAccountType = type },
-                    colors = ButtonDefaults.buttonColors(
+                    onClick = { selectedAccountType = type }, colors = ButtonDefaults.buttonColors(
                         containerColor = if (isSelected) colorResource(id = R.color.btn_color) else Color.LightGray
-                    ),
-                    shape = RoundedCornerShape(16.dp)
+                    ), shape = RoundedCornerShape(16.dp)
                 ) {
                     Text(type, color = if (isSelected) Color.White else Color.Black)
                 }
@@ -243,24 +257,26 @@ fun ProfileScreen(navController: NavController) {
                         user.updateProfile(profileUpdates).await()
 
                         // Save user data to Firestore
-                        saveUserData(
-                            data = userData,
-                            onSuccess = {
-                                // Update imageBase64 to display the uploaded image immediately
-                                if (imageBase64String != null) {
-                                    imageBase64 = imageBase64String
-                                    selectedImageUri = null // Clear local image
-                                }
-                                Toast.makeText(context, "Profile updated successfully!", Toast.LENGTH_SHORT).show()
-                                // Navigate to WeightPickerScreen
-                                navController.navigate(ScreensName.WeightPickerScreen.name)
-                            },
-                            onError = { e ->
-                                Toast.makeText(context, "Failed to save profile: ${e.message}", Toast.LENGTH_SHORT).show()
+                        saveUserData(data = userData, onSuccess = {
+                            // Update imageBase64 to display the uploaded image immediately
+                            if (imageBase64String != null) {
+                                imageBase64 = imageBase64String
+                                selectedImageUri = null // Clear local image
                             }
-                        )
+                            Toast.makeText(
+                                context, "Profile updated successfully!", Toast.LENGTH_SHORT
+                            ).show()
+                            // Navigate to WeightPickerScreen
+                            navController.navigate(ScreensName.WeightPickerScreen.name)
+                        }, onError = { e ->
+                            Toast.makeText(
+                                context, "Failed to save profile: ${e.message}", Toast.LENGTH_SHORT
+                            ).show()
+                        })
                     } catch (e: Exception) {
-                        Toast.makeText(context, "Error processing image: ${e.message}", Toast.LENGTH_SHORT).show()
+                        Toast.makeText(
+                            context, "Error processing image: ${e.message}", Toast.LENGTH_SHORT
+                        ).show()
                     }
                 }
             },
@@ -298,6 +314,33 @@ fun ProfileScreen(navController: NavController) {
     }
 }
 
+
+@Composable
+fun ImageSourceDialog(
+    onDismiss: () -> Unit,
+    onGalleryClick: () -> Unit,
+    onAvatarClick: () -> Unit,
+) {
+    AlertDialog(onDismissRequest = onDismiss, title = { Text("Choose Image Source") }, text = {
+        Column {
+            TextButton(
+                onClick = onGalleryClick, modifier = Modifier.fillMaxWidth()
+            ) {
+                Text("Choose from Gallery")
+            }
+            TextButton(
+                onClick = onAvatarClick, modifier = Modifier.fillMaxWidth()
+            ) {
+                Text("Choose Avatar")
+            }
+        }
+    }, confirmButton = {
+        TextButton(onClick = onDismiss) {
+            Text("Cancel")
+        }
+    })
+}
+
 // Helper function to convert Uri to Base64 string
 fun uriToBase64(context: Context, uri: Uri): String {
     val inputStream = context.contentResolver.openInputStream(uri)
@@ -324,16 +367,13 @@ fun base64ToBitmap(base64: String): Bitmap? {
 fun saveUserData(
     data: Map<String, Any>,
     onSuccess: () -> Unit,
-    onError: (e: Exception) -> Unit
+    onError: (e: Exception) -> Unit,
 ) {
     val userId = FirebaseAuth.getInstance().currentUser?.uid ?: return
     val db = Firebase.firestore
-    db.collection("users").document(userId)
-        .update(data)
-        .addOnSuccessListener {
-            onSuccess()
-        }
-        .addOnFailureListener {
-            onError(it)
-        }
+    db.collection("users").document(userId).update(data).addOnSuccessListener {
+        onSuccess()
+    }.addOnFailureListener {
+        onError(it)
+    }
 }
